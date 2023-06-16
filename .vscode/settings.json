@@ -21,5 +21,13 @@
     ],
     "python.analysis.extraPaths": [
         "${workspaceFolder}"
-    ]
+    ],
+    "files.readonlyInclude": {
+        ".pytest_cache/**": true,
+        ".venv/**": true,
+        ".ipynb_checkpoints/**": true,
+        "__pycache__/**": true,
+        "lightning_logs/**": true
+    },
+    "notebook.formatOnCellExecution": true,
 }
