@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License along with Language
 # Model. If not, see <https://www.gnu.org/licenses/>.
 
+# This code is based off notebooks/attention_from_scratch.ipynb.
+
 import torch as T
 import torch.nn.functional as F
 
@@ -34,6 +36,9 @@ def attention(query: T.Tensor, key: T.Tensor, value: T.Tensor) -> T.Tensor:
 
         A tensor containing the result of the attention calculation.
     """
+
+    # This code is based on the code from
+    # https://medium.com/the-dl/transformers-from-scratch-in-pytorch-8777e346ca51
 
     assert (
         query.ndim == 3
