@@ -26,24 +26,16 @@ from language_model.models.transformer_from_scratch.feed_forward import FeedForw
 from language_model.models.transformer_from_scratch.multi_head_attention import (
     MultiHeadAttention,
 )
-from language_model.models.transformer_from_scratch.residual import (
-    RESIDUAL_DROPOUT_RATE_DEFAULT,
-    Residual,
-)
-from .attention_head import AttentionHead
-
-ENCODER_BLOCK_INPUT_SIZE_DEFAULT = 512
-ENCODER_BLOCK_HEAD_COUNT_DEFAULT = 6
-ENCODER_BLOCK_FEED_FORWARD_HIDDEN_SIZE_DEFAULT = 2048
+from language_model.models.transformer_from_scratch.residual import Residual
 
 
 class EncoderBlock(nn.Module):
     def __init__(
         self,
-        input_size: int = ENCODER_BLOCK_INPUT_SIZE_DEFAULT,
-        head_count: int = ENCODER_BLOCK_HEAD_COUNT_DEFAULT,
-        feed_forward_hidden_size: int = ENCODER_BLOCK_FEED_FORWARD_HIDDEN_SIZE_DEFAULT,
-        dropout_rate: float = RESIDUAL_DROPOUT_RATE_DEFAULT,
+        input_size: int,
+        head_count: int,
+        feed_forward_hidden_size: int,
+        dropout_rate: float,
     ) -> None:
         super().__init__()
 

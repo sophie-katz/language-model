@@ -25,27 +25,18 @@ import torch.nn as nn
 from language_model.models.transformer_from_scratch.positional_encoding import (
     get_positional_encoding,
 )
-from language_model.models.transformer_from_scratch.decoder_block import (
-    DECODER_BLOCK_FEED_FORWARD_HIDDEN_SIZE_DEFAULT,
-    DECODER_BLOCK_HEAD_COUNT_DEFAULT,
-    DECODER_BLOCK_INPUT_SIZE_DEFAULT,
-    DecoderBlock,
-)
-from language_model.models.transformer_from_scratch.residual import (
-    RESIDUAL_DROPOUT_RATE_DEFAULT,
-)
-
-DECODER_LAYER_COUNT_DEFAULT = 6
+from language_model.models.transformer_from_scratch.decoder_block import DecoderBlock
 
 
 class Decoder(nn.Module):
     def __init__(
         self,
-        layer_count: int = DECODER_LAYER_COUNT_DEFAULT,
-        input_size: int = DECODER_BLOCK_INPUT_SIZE_DEFAULT,
-        head_count: int = DECODER_BLOCK_HEAD_COUNT_DEFAULT,
-        feed_forward_hidden_size: int = DECODER_BLOCK_FEED_FORWARD_HIDDEN_SIZE_DEFAULT,
-        dropout_rate: float = RESIDUAL_DROPOUT_RATE_DEFAULT,
+        layer_count: int,
+        input_size: int,
+        head_count: int,
+        feed_forward_hidden_size: int,
+        dropout_rate: float,
+        positional_encoding_base: float,
     ) -> None:
         super().__init__()
 
@@ -54,6 +45,7 @@ class Decoder(nn.Module):
         self.head_count = head_count
         self.feed_forward_hidden_size = feed_forward_hidden_size
         self.dropout_rate = dropout_rate
+        self.positional_encoding_base = positional_encoding_base
 
         self.layers = nn.ModuleList(
             [
@@ -77,7 +69,9 @@ class Decoder(nn.Module):
         # target *= self.input_size ** 0.5
 
         # TODO: Pull this out of the forward function:
-        target += get_positional_encoding(sequence_length, input_size)
+        target += get_positional_encoding(
+            sequence_length, input_size, self.positional_encoding_base
+        )
 
         for layer in self.layers:
             target = layer(target, memory)

@@ -20,13 +20,11 @@
 
 import torch as T
 
-POSITIONAL_ENCODING_BASE_DEFAULT = 1e4
-
 
 def get_positional_encoding(
     sequence_length: int,
     embedding_size: int,
-    base: float = POSITIONAL_ENCODING_BASE_DEFAULT,
+    base: float,
 ) -> T.Tensor:
     """
     Calculates a positional encoding matrix per Vaswani et. al. for use in transformers.

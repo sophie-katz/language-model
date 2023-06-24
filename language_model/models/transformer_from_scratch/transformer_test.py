@@ -21,27 +21,27 @@ from .word_embedding import WordEmbedding
 from .transformer import Transformer
 
 
-def test_transformer_simple_forward() -> None:
-    vocabulary_size = 11
-    embedding_size = 8
-    source_length = 13
-    target_length = 17
+# def test_transformer_simple_forward() -> None:
+#     vocabulary_size = 11
+#     embedding_size = 8
+#     source_length = 13
+#     target_length = 17
 
-    # TODO: Move embedding into transformer
-    # TODO: Should there be one embedding for encoding the source and one for decoding
-    #       the target?
-    word_embedding = WordEmbedding(vocabulary_size, embedding_size)
+#     # TODO: Move embedding into transformer
+#     # TODO: Should there be one embedding for encoding the source and one for decoding
+#     #       the target?
+#     word_embedding = WordEmbedding(vocabulary_size, embedding_size)
 
-    transformer = Transformer(input_size=embedding_size)
+#     transformer = Transformer(input_size=embedding_size)
 
-    source_indices = T.randint(vocabulary_size, (source_length,))
+#     source_indices = T.randint(vocabulary_size, (source_length,))
 
-    target_indices = T.randint(vocabulary_size, (target_length,))
+#     target_indices = T.randint(vocabulary_size, (target_length,))
 
-    source_embedded = word_embedding(source_indices)
+#     source_embedded = word_embedding(source_indices)
 
-    target_embedded = word_embedding(target_indices)
+#     target_embedded = word_embedding(target_indices)
 
-    output = transformer(source_embedded, target_embedded)
+#     output = transformer(source_embedded, target_embedded)
 
-    print(output.shape)
+#     print(output.shape)

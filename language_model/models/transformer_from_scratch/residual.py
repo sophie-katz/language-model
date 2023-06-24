@@ -24,15 +24,12 @@ import torch.nn as nn
 from typing import cast
 
 
-RESIDUAL_DROPOUT_RATE_DEFAULT = 0.1
-
-
 class Residual(nn.Module):
     def __init__(
         self,
         internal_layer: nn.Module,
         input_size: int,
-        dropout_rate: float = RESIDUAL_DROPOUT_RATE_DEFAULT,
+        dropout_rate: float,
     ) -> None:
         super().__init__()
 
