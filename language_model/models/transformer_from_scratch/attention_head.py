@@ -50,16 +50,15 @@ class AttentionHead(nn.Module):
         ), "value tensor must be of shape (batch_size, query_sequence_length, feature_count)"
 
         batch_size = query_input.size(0)
-        feature_count = query_input.size(2)
-        query_sequence_length = query_input.size(1)
-        key_sequence_length = key_input.size(1)
-        value_sequence_length = value_input.size(1)
 
         assert (
             batch_size == key_input.size(0) == value_input.size(0)
         ), "all tensors must have the same batch size"
         assert (
-            feature_count == key_input.size(2) == value_input.size(2)
+            self.input_size
+            == query_input.size(2)
+            == key_input.size(2)
+            == value_input.size(2)
         ), "all tensors must have the same feature count"
 
         return attention(
