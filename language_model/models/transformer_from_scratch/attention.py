@@ -14,6 +14,9 @@
 # Model. If not, see <https://www.gnu.org/licenses/>.
 
 # This code is based off notebooks/attention_from_scratch.ipynb.
+#
+# https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch was
+# used to help with its implementation.
 
 import torch as T
 import torch.nn.functional as F
@@ -66,6 +69,8 @@ def attention(query: T.Tensor, key: T.Tensor, value: T.Tensor) -> T.Tensor:
     score = query.bmm(key.transpose(1, 2))
 
     assert score.shape == (batch_size, query_sequence_length, key_sequence_length)
+
+    # TODO: Apply mask
 
     weight = F.softmax(score / feature_count**0.5)
 

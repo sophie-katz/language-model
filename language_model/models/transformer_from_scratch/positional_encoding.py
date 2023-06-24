@@ -14,6 +14,9 @@
 # Model. If not, see <https://www.gnu.org/licenses/>.
 
 # This code is based off notebooks/positional_encoding_from_scratch.ipynb.
+#
+# https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch was
+# used to help with its implementation.
 
 import torch as T
 

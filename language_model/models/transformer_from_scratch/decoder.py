@@ -13,7 +13,12 @@
 # You should have received a copy of the GNU General Public License along with Language
 # Model. If not, see <https://www.gnu.org/licenses/>.
 
-# This is heavily inspired by https://medium.com/the-dl/transformers-from-scratch-in-pytorch-8777e346ca51
+# This is heavily inspired by
+# https://medium.com/the-dl/transformers-from-scratch-in-pytorch-8777e346ca51.
+#
+# https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch was
+# used to help with its implementation.
+
 
 import torch as T
 import torch.nn as nn
@@ -68,6 +73,10 @@ class Decoder(nn.Module):
         sequence_length = target.size(1)
         input_size = target.size(2)
 
+        # TODO: Possibly scale up embedding:
+        # target *= self.input_size ** 0.5
+
+        # TODO: Pull this out of the forward function:
         target += get_positional_encoding(sequence_length, input_size)
 
         for layer in self.layers:

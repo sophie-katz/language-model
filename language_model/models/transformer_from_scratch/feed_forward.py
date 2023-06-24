@@ -13,7 +13,8 @@
 # You should have received a copy of the GNU General Public License along with Language
 # Model. If not, see <https://www.gnu.org/licenses/>.
 
-# This is heavily inspired by https://medium.com/the-dl/transformers-from-scratch-in-pytorch-8777e346ca51
+# This is heavily inspired by
+# https://medium.com/the-dl/transformers-from-scratch-in-pytorch-8777e346ca51.
 
 import torch as T
 import torch.nn as nn

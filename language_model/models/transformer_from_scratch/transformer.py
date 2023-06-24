@@ -13,7 +13,11 @@
 # You should have received a copy of the GNU General Public License along with Language
 # Model. If not, see <https://www.gnu.org/licenses/>.
 
-# This is heavily inspired by https://medium.com/the-dl/transformers-from-scratch-in-pytorch-8777e346ca51
+# This is heavily inspired by
+# https://medium.com/the-dl/transformers-from-scratch-in-pytorch-8777e346ca51.
+#
+# https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch was
+# used to help with its implementation.
 
 import torch as T
 import torch.nn as nn
@@ -42,7 +46,7 @@ class Transformer(nn.Module):
         head_count: int = TRANSFORMER_HEAD_COUNT_DEFAULT,
         feed_forward_hidden_size: int = TRANSFORMER_FEED_FORWARD_HIDDEN_SIZE_DEFAULT,
         dropout_rate: float = TRANSFORMER_DROPOUT_RATE_DEFAULT,
-        activation: nn.Module = nn.ReLU(),
+        activation: nn.Module = nn.ReLU(),  # TODO: Is this needed?
     ) -> None:
         super().__init__()
 
