@@ -1,0 +1,66 @@
+# Copyright (c) 2023 Sophie Katz
+#
+# This file is part of Language Model.
+#
+# Language Model is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# Language Model is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with Language
+# Model. If not, see <https://www.gnu.org/licenses/>.
+
+# This code is based off notebooks/positional_encoding_from_scratch.ipynb.
+
+import torch as T
+
+POSITIONAL_ENCODING_BASE_DEFAULT = 1e4
+
+
+def get_positional_encoding(
+    sequence_length: int,
+    embedding_size: int,
+    base: float = POSITIONAL_ENCODING_BASE_DEFAULT,
+) -> T.Tensor:
+    """
+    Calculates a positional encoding matrix per Vaswani et. al. for use in transformers.
+
+    Parameters
+    ==========
+        sequence_length: int
+            The length of the sequence to calculate the positional encoding for.
+        embedding_size: int
+            The size of the embedding to calculate the positional encoding for.
+        base: float
+            The base of the exponent to use in the positional encoding calculation.
+
+    Returns
+    =======
+        A tensor of shape (sequence_length, embedding_size) containing the positional
+        encoding matrix for the given sequence length and embedding size.
+    """
+
+    assert sequence_length > 0
+    assert embedding_size > 1
+
+    exponent = (
+        T.repeat_interleave(
+            2 * T.arange(0, embedding_size // 2), 2, output_size=embedding_size
+        )
+        / embedding_size
+    )
+
+    assert exponent.shape == (embedding_size,)
+
+    phase = T.arange(sequence_length).unsqueeze(1) / base**exponent
+
+    assert phase.shape == (sequence_length, embedding_size)
+
+    encoding = T.where(T.arange(embedding_size) % 2 == 0, T.sin(phase), T.cos(phase))
+
+    assert encoding.shape == (sequence_length, embedding_size)
+
+    return encoding
