@@ -38,11 +38,11 @@ class TransformerModule(lightning.LightningModule):
         self.hparams.dropout_rate = dropout_rate  # type: ignore
         self.hparams.positional_encoding_base = positional_encoding_base  # type: ignore
 
-        self.transformer = Transformer(
-            encoder_layer_count=encoder_layer_count,
-            decoder_layer_count=decoder_layer_count,
-            input_size=input_size,
-            head_count=head_count,
-            feed_forward_hidden_size=feed_forward_hidden_size,
-            dropout_rate=dropout_rate,
-        )
+        # self.transformer = Transformer(
+        #     encoder_layer_count=encoder_layer_count,
+        #     decoder_layer_count=decoder_layer_count,
+        #     input_size=input_size,
+        #     head_count=head_count,
+        #     feed_forward_hidden_size=feed_forward_hidden_size,
+        #     dropout_rate=dropout_rate,
+        # )

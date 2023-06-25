@@ -13,13 +13,20 @@
 # You should have received a copy of the GNU General Public License along with Language
 # Model. If not, see <https://www.gnu.org/licenses/>.
 
-# This code is based off notebooks/attention_from_scratch.ipynb.
+# This code is based off notebooks/attention_from_scratch.ipynb and
+# https://medium.com/the-dl/transformers-from-scratch-in-pytorch-8777e346ca51.
 #
 # https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch was
 # used to help with its implementation.
 
 import torch as T
 import torch.nn.functional as F
+from language_model.models.transformer_from_scratch.shapes import (
+    get_sequence_batch_size,
+    get_sequence_feature_count,
+    get_sequence_length,
+    has_sequence_shape,
+)
 
 
 def attention(query: T.Tensor, key: T.Tensor, value: T.Tensor) -> T.Tensor:
@@ -40,31 +47,32 @@ def attention(query: T.Tensor, key: T.Tensor, value: T.Tensor) -> T.Tensor:
         A tensor containing the result of the attention calculation.
     """
 
-    # This code is based on the code from
-    # https://medium.com/the-dl/transformers-from-scratch-in-pytorch-8777e346ca51
+    assert has_sequence_shape(
+        query
+    ), "query tensor must be of shape (batch_size, sequence_length, feature_count)"
+    assert has_sequence_shape(
+        key
+    ), "key tensor must be of shape (batch_size, sequence_length, feature_count)"
+    assert has_sequence_shape(
+        value
+    ), "value tensor must be of shape (batch_size, sequence_length, feature_count)"
+
+    batch_size = get_sequence_batch_size(query)
+    feature_count = get_sequence_feature_count(query)
+    query_sequence_length = get_sequence_length(query)
+    key_sequence_length = get_sequence_length(key)
 
     assert (
-        query.ndim == 3
-    ), "query tensor must be of shape (batch_size, query_sequence_length, feature_count)"
-    assert (
-        key.ndim == 3
-    ), "key tensor must be of shape (batch_size, query_sequence_length, feature_count)"
-    assert (
-        value.ndim == 3
-    ), "value tensor must be of shape (batch_size, query_sequence_length, feature_count)"
-
-    batch_size = query.size(0)
-    feature_count = query.size(2)
-    query_sequence_length = query.size(1)
-    key_sequence_length = key.size(1)
-    value_sequence_length = value.size(1)
-
-    assert (
-        batch_size == key.size(0) == value.size(0)
+        get_sequence_batch_size(query)
+        == get_sequence_batch_size(key)
+        == get_sequence_batch_size(value)
     ), "all tensors must have the same batch size"
+
     assert (
-        feature_count == key.size(2) == value.size(2)
-    ), "all tensors must have the same feature count"
+        get_sequence_feature_count(query)
+        == get_sequence_feature_count(key)
+        == get_sequence_feature_count(value)
+    ), "all tensors must have the same feature count equal to input size"
 
     score = query.bmm(key.transpose(1, 2))
 

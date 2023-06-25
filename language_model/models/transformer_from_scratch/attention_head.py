@@ -19,6 +19,11 @@
 import torch as T
 import torch.nn as nn
 from .attention import attention
+from .shapes import (
+    has_sequence_shape,
+    get_sequence_batch_size,
+    get_sequence_feature_count,
+)
 
 
 class AttentionHead(nn.Module):
@@ -39,27 +44,28 @@ class AttentionHead(nn.Module):
     def forward(
         self, query_input: T.Tensor, key_input: T.Tensor, value_input: T.Tensor
     ) -> T.Tensor:
-        assert (
-            query_input.ndim == 3
-        ), "query tensor must be of shape (batch_size, query_sequence_length, feature_count)"
-        assert (
-            key_input.ndim == 3
-        ), "key tensor must be of shape (batch_size, query_sequence_length, feature_count)"
-        assert (
-            value_input.ndim == 3
-        ), "value tensor must be of shape (batch_size, query_sequence_length, feature_count)"
-
-        batch_size = query_input.size(0)
+        assert has_sequence_shape(
+            query_input
+        ), "query tensor must be of shape (batch_size, sequence_length, feature_count)"
+        assert has_sequence_shape(
+            key_input
+        ), "key tensor must be of shape (batch_size, sequence_length, feature_count)"
+        assert has_sequence_shape(
+            value_input
+        ), "value tensor must be of shape (batch_size, sequence_length, feature_count)"
 
         assert (
-            batch_size == key_input.size(0) == value_input.size(0)
+            get_sequence_batch_size(query_input)
+            == get_sequence_batch_size(key_input)
+            == get_sequence_batch_size(value_input)
         ), "all tensors must have the same batch size"
+
         assert (
             self.input_size
-            == query_input.size(2)
-            == key_input.size(2)
-            == value_input.size(2)
-        ), "all tensors must have the same feature count"
+            == get_sequence_feature_count(query_input)
+            == get_sequence_feature_count(key_input)
+            == get_sequence_feature_count(value_input)
+        ), "all tensors must have the same feature count equal to input size"
 
         return attention(
             self.query(query_input), self.key(key_input), self.value(value_input)
