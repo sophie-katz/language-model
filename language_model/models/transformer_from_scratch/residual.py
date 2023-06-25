@@ -47,9 +47,8 @@ class Residual(nn.Module, Generic[InternalLayer]):
         assert tensors[1].ndim == 2
         assert tensors[2].ndim == 2
 
-        return cast(
-            T.Tensor,
-            self.normalization(
-                tensors[0] + self.dropout(self.internal_layer(*tensors))
-            ),
-        )
+        result: T.Tensor = self.internal_layer(*tensors)
+        result = self.dropout(result)
+        result += tensors[0]
+        result = self.normalization(result)
+        return result

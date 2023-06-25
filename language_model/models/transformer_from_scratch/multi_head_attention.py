@@ -58,12 +58,13 @@ class MultiHeadAttention(nn.Module):
         self.linear = nn.Linear(self.head_count * self.key_size, self.input_size)
 
     def forward(self, qkv: QKV) -> T.Tensor:
-        return cast(
-            T.Tensor,
-            self.linear(
-                T.cat(
-                    [head(qkv.query, qkv.key, qkv.value) for head in self.heads],
-                    dim=-1,
-                )
-            ),
+        head_results = [head(qkv.query, qkv.key, qkv.value) for head in self.heads]
+
+        result: T.Tensor = T.cat(
+            head_results,
+            dim=-1,
         )
+
+        result = self.linear(result)
+
+        return result

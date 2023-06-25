@@ -86,6 +86,7 @@ class DecoderBlock(nn.Module):
         )
 
     def forward(self, target: T.Tensor, memory: T.Tensor) -> T.Tensor:
-        target = self.self_attention(target, target, target)
-        target = self.attention(target, memory, memory)
-        return cast(T.Tensor, self.feed_forward(target))
+        result: T.Tensor = self.self_attention(target, target, target)
+        result = self.attention(result, memory, memory)
+        result = self.feed_forward(result)
+        return result

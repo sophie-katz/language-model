@@ -57,11 +57,11 @@ class WordEmbedding(nn.Module):
 
         assert sentence.ndim == 1
 
-        result = self.embedding(sentence)
+        result: T.Tensor = self.embedding(sentence)
 
         # We expect result to be of shape (sentence_length, embedding_size)
         assert result.ndim == 2
         assert result.size(0) == sentence.size(0)
         assert result.size(1) == self.embedding_size
 
-        return cast(T.Tensor, result)
+        return result

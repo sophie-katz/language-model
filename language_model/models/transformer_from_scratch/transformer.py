@@ -62,4 +62,6 @@ class Transformer(nn.Module):
         )
 
     def forward(self, source: T.Tensor, target: T.Tensor) -> T.Tensor:
-        return cast(T.Tensor, self.decoder(target, self.encoder(source)))
+        result: T.Tensor = self.encoder(source)
+        result = self.decoder(target, result)
+        return result

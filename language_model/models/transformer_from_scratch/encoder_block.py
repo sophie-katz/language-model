@@ -73,5 +73,6 @@ class EncoderBlock(nn.Module):
         )
 
     def forward(self, source: T.Tensor) -> T.Tensor:
-        source = self.attention(source, source, source)
-        return cast(T.Tensor, self.feed_forward(source))
+        result: T.Tensor = self.attention(source, source, source)
+        result = self.feed_forward(source)
+        return result
