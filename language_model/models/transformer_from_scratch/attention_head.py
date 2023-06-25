@@ -18,6 +18,7 @@
 
 import torch as T
 import torch.nn as nn
+from language_model.models.transformer_from_scratch.qkv import QKV
 from .attention import attention
 from .shapes import (
     has_sequence_shape,
@@ -37,36 +38,19 @@ class AttentionHead(nn.Module):
         self.key_size = key_size
         self.value_size = value_size
 
-        self.query = nn.Linear(input_size, query_size)
-        self.key = nn.Linear(input_size, key_size)
-        self.value = nn.Linear(input_size, value_size)
+        self.query_linear = nn.Linear(input_size, query_size)
+        self.key_linear = nn.Linear(input_size, key_size)
+        self.value_linear = nn.Linear(input_size, value_size)
 
-    def forward(
-        self, query_input: T.Tensor, key_input: T.Tensor, value_input: T.Tensor
-    ) -> T.Tensor:
-        assert has_sequence_shape(
-            query_input
-        ), "query tensor must be of shape (batch_size, sequence_length, feature_count)"
-        assert has_sequence_shape(
-            key_input
-        ), "key tensor must be of shape (batch_size, sequence_length, feature_count)"
-        assert has_sequence_shape(
-            value_input
-        ), "value tensor must be of shape (batch_size, sequence_length, feature_count)"
-
+    def forward(self, qkv: QKV) -> T.Tensor:
         assert (
-            get_sequence_batch_size(query_input)
-            == get_sequence_batch_size(key_input)
-            == get_sequence_batch_size(value_input)
-        ), "all tensors must have the same batch size"
-
-        assert (
-            self.input_size
-            == get_sequence_feature_count(query_input)
-            == get_sequence_feature_count(key_input)
-            == get_sequence_feature_count(value_input)
-        ), "all tensors must have the same feature count equal to input size"
+            self.input_size == qkv.feature_count
+        ), "QKV tensors must have the feature count equal to input size"
 
         return attention(
-            self.query(query_input), self.key(key_input), self.value(value_input)
+            QKV(
+                self.query_linear(qkv.query),
+                self.key_linear(qkv.key),
+                self.value_linear(qkv.value),
+            )
         )

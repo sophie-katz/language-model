@@ -23,6 +23,7 @@ import torch as T
 import torch.nn as nn
 from typing import cast
 from .attention_head import AttentionHead
+from .qkv import QKV
 
 
 class MultiHeadAttention(nn.Module):
@@ -56,14 +57,12 @@ class MultiHeadAttention(nn.Module):
 
         self.linear = nn.Linear(head_count * key_size, input_size)
 
-    def forward(
-        self, query_input: T.Tensor, key_input: T.Tensor, value_input: T.Tensor
-    ) -> T.Tensor:
+    def forward(self, qkv: QKV) -> T.Tensor:
         return cast(
             T.Tensor,
             self.linear(
                 T.cat(
-                    [head(query_input, key_input, value_input) for head in self.heads],
+                    [head(qkv.query, qkv.key, qkv.value) for head in self.heads],
                     dim=-1,
                 )
             ),

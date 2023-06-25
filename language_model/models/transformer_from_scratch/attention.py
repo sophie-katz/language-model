@@ -27,9 +27,10 @@ from language_model.models.transformer_from_scratch.shapes import (
     get_sequence_length,
     has_sequence_shape,
 )
+from language_model.models.transformer_from_scratch.qkv import QKV
 
 
-def attention(query: T.Tensor, key: T.Tensor, value: T.Tensor) -> T.Tensor:
+def attention(qkv: QKV) -> T.Tensor:
     """
     Compute attention for a single head.
 
@@ -47,45 +48,26 @@ def attention(query: T.Tensor, key: T.Tensor, value: T.Tensor) -> T.Tensor:
         A tensor containing the result of the attention calculation.
     """
 
-    assert has_sequence_shape(
-        query
-    ), "query tensor must be of shape (batch_size, sequence_length, feature_count)"
-    assert has_sequence_shape(
-        key
-    ), "key tensor must be of shape (batch_size, sequence_length, feature_count)"
-    assert has_sequence_shape(
-        value
-    ), "value tensor must be of shape (batch_size, sequence_length, feature_count)"
+    score = qkv.query.bmm(qkv.key.transpose(1, 2))
 
-    batch_size = get_sequence_batch_size(query)
-    feature_count = get_sequence_feature_count(query)
-    query_sequence_length = get_sequence_length(query)
-    key_sequence_length = get_sequence_length(key)
-
-    assert (
-        get_sequence_batch_size(query)
-        == get_sequence_batch_size(key)
-        == get_sequence_batch_size(value)
-    ), "all tensors must have the same batch size"
-
-    assert (
-        get_sequence_feature_count(query)
-        == get_sequence_feature_count(key)
-        == get_sequence_feature_count(value)
-    ), "all tensors must have the same feature count equal to input size"
-
-    score = query.bmm(key.transpose(1, 2))
-
-    assert score.shape == (batch_size, query_sequence_length, key_sequence_length)
+    assert score.shape == (
+        qkv.batch_size,
+        get_sequence_length(qkv.query),
+        get_sequence_length(qkv.key),
+    )
 
     # TODO: Apply mask - https://www.notion.so/Apply-mask-a0a22426e0a94a3aa7d49abc21075fb9?pvs=4
 
-    weight = F.softmax(score / feature_count**0.5)
+    weight = F.softmax(score / qkv.feature_count**0.5)
 
     assert weight.shape == score.shape
 
-    result = weight.bmm(value)
+    result = weight.bmm(qkv.value)
 
-    assert result.shape == (batch_size, query_sequence_length, feature_count)
+    assert result.shape == (
+        qkv.batch_size,
+        get_sequence_length(qkv.query),
+        qkv.feature_count,
+    )
 
     return result

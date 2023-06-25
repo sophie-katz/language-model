@@ -14,6 +14,7 @@
 # Model. If not, see <https://www.gnu.org/licenses/>.
 
 import torch as T
+from language_model.models.transformer_from_scratch.qkv import QKV
 from .attention import attention
 
 
@@ -27,6 +28,6 @@ def test_attention() -> None:
     key = T.rand(2, 4, 3)
     value = T.rand(2, 4, 3)
 
-    result = attention(query, key, value)
+    result = attention(QKV(query, key, value))
 
     assert result.shape == (2, 5, 3)
