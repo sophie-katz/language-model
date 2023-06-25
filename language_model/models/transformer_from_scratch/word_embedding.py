@@ -21,8 +21,10 @@
 import torch as T
 import torch.nn as nn
 from typing import cast
+import dataclasses
 
 
+@dataclasses.dataclass
 class WordEmbedding(nn.Module):
     """
     A simple word embedding model that takes a word as input and returns its embedding.
@@ -38,14 +40,16 @@ class WordEmbedding(nn.Module):
             The size of the embedding vector for a given word.
     """
 
-    def __init__(self, vocabulary_size: int, embedding_size: int) -> None:
+    vocabulary_size: int
+    embedding_size: int
+
+    embedding: nn.Embedding = dataclasses.field(init=False)
+
+    def __post_init__(self) -> None:
         super().__init__()
 
-        self.vocab_size = vocabulary_size
-        self.embedding_size = embedding_size
-
         # We use Pytorch's built in embedding layer
-        self.embedding = nn.Embedding(self.vocab_size, self.embedding_size)
+        self.embedding = nn.Embedding(self.vocabulary_size, self.embedding_size)
 
     def forward(self, sentence: T.Tensor) -> T.Tensor:
         # We expect sentence to be of shape (sentence_length,) and to be a tensor of

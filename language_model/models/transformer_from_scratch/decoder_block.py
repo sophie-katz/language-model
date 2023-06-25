@@ -27,22 +27,26 @@ from language_model.models.transformer_from_scratch.multi_head_attention import 
     MultiHeadAttention,
 )
 from language_model.models.transformer_from_scratch.residual import Residual
+import dataclasses
 
 
+@dataclasses.dataclass
 class DecoderBlock(nn.Module):
-    def __init__(
-        self,
-        input_size: int,
-        head_count: int,
-        feed_forward_hidden_size: int,
-        dropout_rate: float,
-    ) -> None:
-        super().__init__()
+    input_size: int
+    head_count: int
+    feed_forward_hidden_size: int
+    dropout_rate: float
 
-        self.input_size = input_size
-        self.head_count = head_count
-        self.feed_forward_hidden_size = feed_forward_hidden_size
-        self.dropout_rate = dropout_rate
+    query_size: int = dataclasses.field(init=False)
+    key_size: int = dataclasses.field(init=False)
+    value_size: int = dataclasses.field(init=False)
+
+    self_attention: Residual[MultiHeadAttention] = dataclasses.field(init=False)
+    attention: Residual[MultiHeadAttention] = dataclasses.field(init=False)
+    feed_forward: Residual[FeedForward] = dataclasses.field(init=False)
+
+    def __post_init__(self) -> None:
+        super().__init__()
 
         self.query_size = max(self.input_size // self.head_count, 1)
         self.key_size = max(self.input_size // self.head_count, 1)

@@ -16,14 +16,18 @@
 # This is heavily inspired by
 # https://medium.com/the-dl/transformers-from-scratch-in-pytorch-8777e346ca51.
 
-import torch as T
 import torch.nn as nn
+import dataclasses
 
 
+@dataclasses.dataclass
 class FeedForward(nn.Sequential):
-    def __init__(self, input_size: int, hidden_size: int) -> None:
+    input_size: int
+    hidden_size: int
+
+    def __post_init__(self) -> None:
         super().__init__(
-            nn.Linear(input_size, hidden_size),
+            nn.Linear(self.input_size, self.hidden_size),
             nn.ReLU(),
-            nn.Linear(hidden_size, input_size),
+            nn.Linear(self.hidden_size, self.input_size),
         )

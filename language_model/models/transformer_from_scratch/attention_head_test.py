@@ -17,17 +17,18 @@ import torch as T
 from .attention_head import AttentionHead
 
 
-# def test_attention_head() -> None:
-#     # Batch size: 2
-#     #
-#     # Input sequence length: 4
-#     # Output sequence length: 5
+def test_attention_head() -> None:
+    #     # Batch size: 2
+    #     #
+    #     # Input sequence length: 4
+    #     # Output sequence length: 5
 
-#     query = T.rand(2, 5, 3)
-#     key = T.rand(2, 4, 3)
-#     value = T.rand(2, 4, 3)
+    #     query = T.rand(2, 5, 3)
+    #     key = T.rand(2, 4, 3)
+    #     value = T.rand(2, 4, 3)
 
-#     attention_head = AttentionHead()
+    attention_head = AttentionHead(2, 2, 2, 2)
+
 
 #     result = attention(query, key, value)
 

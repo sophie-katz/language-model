@@ -21,24 +21,24 @@
 
 import torch as T
 import torch.nn as nn
-from typing import cast
+from typing import cast, Generic, TypeVar
+import dataclasses
 
 
-class Residual(nn.Module):
-    def __init__(
-        self,
-        internal_layer: nn.Module,
-        input_size: int,
-        dropout_rate: float,
-    ) -> None:
+InternalLayer = TypeVar("InternalLayer", bound=nn.Module)
+
+
+@dataclasses.dataclass
+class Residual(nn.Module, Generic[InternalLayer]):
+    internal_layer: InternalLayer
+    input_size: int
+    dropout_rate: float
+
+    def __post_init__(self) -> None:
         super().__init__()
 
-        self.internal_layer = internal_layer
-        self.input_size = input_size
-        self.dropout_rate = dropout_rate
-
-        self.normalization = nn.LayerNorm(input_size)
-        self.dropout = nn.Dropout(dropout_rate)
+        self.normalization = nn.LayerNorm(self.input_size)
+        self.dropout = nn.Dropout(self.dropout_rate)
 
     def forward(self, *tensors: T.Tensor) -> T.Tensor:
         assert len(tensors) > 0

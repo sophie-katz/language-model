@@ -25,22 +25,26 @@ from .shapes import (
     get_sequence_batch_size,
     get_sequence_feature_count,
 )
+import dataclasses
 
 
+@dataclasses.dataclass
 class AttentionHead(nn.Module):
-    def __init__(
-        self, input_size: int, query_size: int, key_size: int, value_size: int
-    ) -> None:
+    input_size: int
+    query_size: int
+    key_size: int
+    value_size: int
+
+    query_linear: nn.Linear = dataclasses.field(init=False)
+    key_linear: nn.Linear = dataclasses.field(init=False)
+    value_linear: nn.Linear = dataclasses.field(init=False)
+
+    def __post_init__(self) -> None:
         super().__init__()
 
-        self.input_size = input_size
-        self.query_size = query_size
-        self.key_size = key_size
-        self.value_size = value_size
-
-        self.query_linear = nn.Linear(input_size, query_size)
-        self.key_linear = nn.Linear(input_size, key_size)
-        self.value_linear = nn.Linear(input_size, value_size)
+        self.query_linear = nn.Linear(self.input_size, self.query_size)
+        self.key_linear = nn.Linear(self.input_size, self.key_size)
+        self.value_linear = nn.Linear(self.input_size, self.value_size)
 
     def forward(self, qkv: QKV) -> T.Tensor:
         assert (

@@ -25,26 +25,22 @@ from language_model.models.transformer_from_scratch.positional_encoding import (
     get_positional_encoding,
 )
 from language_model.models.transformer_from_scratch.encoder_block import EncoderBlock
+import dataclasses
 
 
+@dataclasses.dataclass
 class Encoder(nn.Module):
-    def __init__(
-        self,
-        layer_count: int,
-        input_size: int,
-        head_count: int,
-        feed_forward_hidden_size: int,
-        dropout_rate: float,
-        positional_encoding_base: float,
-    ) -> None:
-        super().__init__()
+    layer_count: int
+    input_size: int
+    head_count: int
+    feed_forward_hidden_size: int
+    dropout_rate: float
+    positional_encoding_base: float
 
-        self.layer_count = layer_count
-        self.input_size = input_size
-        self.head_count = head_count
-        self.feed_forward_hidden_size = feed_forward_hidden_size
-        self.dropout_rate = dropout_rate
-        self.positional_encoding_base = positional_encoding_base
+    layers: nn.ModuleList = dataclasses.field(init=False)
+
+    def __post_init__(self) -> None:
+        super().__init__()
 
         self.layers = nn.ModuleList(
             [
