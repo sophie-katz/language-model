@@ -27,9 +27,9 @@ from .transformer import Transformer
 #     source_length = 13
 #     target_length = 17
 
-#     # TODO: Move embedding into transformer
+#     # TODO: Move embedding into transformer - https://www.notion.so/Move-word-embedding-into-transformer-426fe05f4e8f43998a70d198e053c751?pvs=4
 #     # TODO: Should there be one embedding for encoding the source and one for decoding
-#     #       the target?
+#     #       the target? - https://www.notion.so/Confirm-number-of-embedding-modules-2d49cf3367fc490986c834308b86813a?pvs=4
 #     word_embedding = WordEmbedding(vocabulary_size, embedding_size)
 
 #     transformer = Transformer(input_size=embedding_size)

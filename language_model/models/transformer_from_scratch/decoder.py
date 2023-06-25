@@ -65,10 +65,10 @@ class Decoder(nn.Module):
         sequence_length = target.size(1)
         input_size = target.size(2)
 
-        # TODO: Possibly scale up embedding:
+        # TODO: Possibly scale up embedding: https://www.notion.so/Confirm-if-embedding-should-be-scaled-up-55f74b736e724bf0b40788873a9235ed?pvs=4
         # target *= self.input_size ** 0.5
 
-        # TODO: Pull this out of the forward function:
+        # TODO: Pull this out of the forward function: https://www.notion.so/Pull-positional-encoding-out-of-the-forward-function-d034d6414f054f2aa163535c707182a3?pvs=4
         target += get_positional_encoding(
             sequence_length, input_size, self.positional_encoding_base
         )

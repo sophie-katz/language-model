@@ -42,7 +42,7 @@ class MultiHeadAttention(nn.Module):
         self.key_size = key_size
         self.value_size = value_size
 
-        # TODO: Should each head have a separate key, query, and value matrix?
+        # TODO: Should each head have a separate key, query, and value matrix? - https://www.notion.so/Confirm-if-each-head-should-have-separate-trainable-weights-a3a189025e544dd58904ca23007a902d?pvs=4
         self.heads = nn.ModuleList(
             [
                 AttentionHead(input_size, query_size, key_size, value_size)
@@ -50,7 +50,9 @@ class MultiHeadAttention(nn.Module):
             ]
         )
 
-        assert key_size == value_size, "TODO: implement different key and value sizes"
+        assert (
+            key_size == value_size
+        ), "TODO: implement different key and value sizes"  # https://www.notion.so/Implement-different-key-and-value-sizes-3b4412dff5e9422caaa4cda49a0c4587?pvs=4
 
         self.linear = nn.Linear(head_count * key_size, input_size)
 

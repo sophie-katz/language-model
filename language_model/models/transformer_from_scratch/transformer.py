@@ -36,7 +36,6 @@ class Transformer(nn.Module):
         feed_forward_hidden_size: int,
         dropout_rate: float,
         positional_encoding_base: float,
-        activation: nn.Module = nn.ReLU(),  # TODO: Is this needed?
     ) -> None:
         super().__init__()
 
@@ -47,7 +46,6 @@ class Transformer(nn.Module):
         self.feed_forward_hidden_size = feed_forward_hidden_size
         self.dropout_rate = dropout_rate
         self.positional_encoding_base = positional_encoding_base
-        self.activation = activation
 
         self.encoder = Encoder(
             layer_count=self.encoder_layer_count,

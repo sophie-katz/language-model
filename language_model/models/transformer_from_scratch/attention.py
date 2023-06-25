@@ -70,7 +70,7 @@ def attention(query: T.Tensor, key: T.Tensor, value: T.Tensor) -> T.Tensor:
 
     assert score.shape == (batch_size, query_sequence_length, key_sequence_length)
 
-    # TODO: Apply mask
+    # TODO: Apply mask - https://www.notion.so/Apply-mask-a0a22426e0a94a3aa7d49abc21075fb9?pvs=4
 
     weight = F.softmax(score / feature_count**0.5)
 

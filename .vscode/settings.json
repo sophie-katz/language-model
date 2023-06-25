@@ -30,4 +30,14 @@
         "lightning_logs/**": true
     },
     "notebook.formatOnCellExecution": true,
+    "todohighlight.exclude": [
+        "**/.venv/**",
+        "**/.mypy_cache/**",
+        "**/.pytest_cache/**",
+        "**/.vscode/**",
+        "**/__pycache__/**"
+    ],
+    "todohighlight.include": [
+        "**/*.py",
+    ],
 }
