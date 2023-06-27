@@ -19,7 +19,7 @@ import torch as T
 
 from language_model.models.transformer_from_scratch.qkv import QKV
 
-from .attention import attention
+from language_model.models.transformer_from_scratch.attention import attention
 
 
 def test_attention() -> None:

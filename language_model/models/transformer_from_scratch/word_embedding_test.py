@@ -17,7 +17,7 @@
 
 import torch as T
 
-from .word_embedding import WordEmbedding
+from language_model.models.transformer_from_scratch.word_embedding import WordEmbedding
 
 
 def test_word_embedding() -> None:

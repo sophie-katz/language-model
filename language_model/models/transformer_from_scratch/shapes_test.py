@@ -19,7 +19,7 @@
 
 import torch as T
 
-from .shapes import (
+from language_model.models.transformer_from_scratch.shapes import (
     get_sequence_batch_size,
     get_sequence_length,
     get_sequence_feature_count,

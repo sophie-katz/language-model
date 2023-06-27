@@ -46,8 +46,8 @@ def get_positional_encoding(
         A tensor of shape (sequence_length, embedding_size) containing the positional
         encoding matrix for the given sequence length and embedding size.
     """
-    assert sequence_length > 0
-    assert embedding_size > 1
+    assert sequence_length > 0, "sequences must be non-empty"
+    assert embedding_size > 0, "embeddings must have at least 1 feature"
 
     exponent = (
         T.repeat_interleave(
@@ -56,14 +56,25 @@ def get_positional_encoding(
         / embedding_size
     )
 
-    assert exponent.shape == (embedding_size,)
+    assert exponent.shape == (
+        embedding_size,
+    ), "exponent shape is unexpected, it should be a vector of the same size as the \
+        embedding"
 
     phase = T.arange(sequence_length).unsqueeze(1) / base**exponent
 
-    assert phase.shape == (sequence_length, embedding_size)
+    assert phase.shape == (
+        sequence_length,
+        embedding_size,
+    ), "phase shape is unexpected, it should be a matrix of shape (sequence_length, \
+        embedding_size)"
 
     encoding = T.where(T.arange(embedding_size) % 2 == 0, T.sin(phase), T.cos(phase))
 
-    assert encoding.shape == (sequence_length, embedding_size)
+    assert encoding.shape == (
+        sequence_length,
+        embedding_size,
+    ), "encoding shape is unexpected, it should be a matrix of shape (sequence_length, \
+        embedding_size)"
 
     return encoding

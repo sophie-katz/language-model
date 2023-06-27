@@ -76,12 +76,13 @@ class WordEmbedding(nn.Module):
         """
         # pylint: disable=magic-value-comparison
 
-        assert sentence.ndim == 1
+        assert sentence.ndim == 1, "input sentence should be a vector of word indices"
 
         result: T.Tensor = self.embedding(sentence)
 
-        assert result.ndim == 2
-        assert result.size(0) == sentence.size(0)
-        assert result.size(1) == self.embedding_size
+        assert result.shape == (
+            sentence.size(0),
+            self.embedding_size,
+        ), "embedding should be a matrix of shape (sentence_length, embedding_size)"
 
         return result

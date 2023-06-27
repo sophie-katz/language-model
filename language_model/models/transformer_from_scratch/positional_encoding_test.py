@@ -18,7 +18,9 @@
 # import torch as T
 import math
 
-from .positional_encoding import get_positional_encoding
+from language_model.models.transformer_from_scratch.positional_encoding import (
+    get_positional_encoding,
+)
 
 
 EPSILON = 1e-5

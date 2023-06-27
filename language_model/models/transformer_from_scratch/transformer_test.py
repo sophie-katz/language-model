@@ -20,8 +20,10 @@ https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch.
 """
 
 # import torch as T
-# from .word_embedding import WordEmbedding
-# from .transformer import Transformer
+# from language_model.models.transformer_from_scratch.word_embedding import (
+#   WordEmbedding
+# )
+# from language_model.models.transformer_from_scratch.transformer import Transformer
 
 
 # def test_transformer_simple_forward() -> None:

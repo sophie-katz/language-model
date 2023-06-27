@@ -16,7 +16,9 @@
 """Unit tests."""
 
 # import torch as T
-from .attention_head import AttentionHead
+
+
+from language_model.models.transformer_from_scratch.attention_head import AttentionHead
 
 
 def test_attention_head() -> None:

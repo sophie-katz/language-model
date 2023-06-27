@@ -27,8 +27,8 @@ import dataclasses
 import torch as T
 from torch import nn
 
-from .attention_head import AttentionHead
-from .qkv import QKV
+from language_model.models.transformer_from_scratch.attention_head import AttentionHead
+from language_model.models.transformer_from_scratch.qkv import QKV
 
 
 @dataclasses.dataclass

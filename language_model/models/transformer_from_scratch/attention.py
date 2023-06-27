@@ -50,14 +50,18 @@ def attention(qkv: QKV) -> T.Tensor:
         qkv.batch_size,
         get_sequence_length(qkv.query),
         get_sequence_length(qkv.key),
-    )
+    ), "score shape is unexpected, it should be (batch_size, sequence_length, \
+        sequence_length)"
 
     # TODO: Apply mask
     # - https://www.notion.so/Apply-mask-a0a22426e0a94a3aa7d49abc21075fb9?pvs=4
 
     weight = F.softmax(score / qkv.feature_count**0.5)
 
-    assert weight.shape == score.shape
+    assert (
+        weight.shape == score.shape
+    ), "softmax should not change the shape of the \
+        tensor"
 
     result = weight.bmm(qkv.value)
 
@@ -65,6 +69,7 @@ def attention(qkv: QKV) -> T.Tensor:
         qkv.batch_size,
         get_sequence_length(qkv.query),
         qkv.feature_count,
-    )
+    ), "result shape is unexpected, it should be (batch_size, sequence_length, \
+        feature_count)"
 
     return result
