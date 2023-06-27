@@ -40,4 +40,27 @@
     "todohighlight.include": [
         "**/*.py",
     ],
+    "python.linting.pylintEnabled": true,
+    "python.linting.banditArgs": [
+        "-s",
+        "B101"
+    ],
+    "python.linting.banditEnabled": true,
+    "python.linting.pycodestyleEnabled": true,
+    "python.linting.pylintArgs": [
+        "--enable-all-extensions",
+        "--disable",
+        "R2044,W0511,R0902,C2001",
+        "--ignored-modules",
+        "torch"
+    ],
+    "python.linting.pydocstyleEnabled": true,
+    "python.linting.pycodestyleArgs": [
+        "--max-line-length=88"
+    ],
+    "isort.check": true,
+    "python.linting.pydocstyleArgs": [
+        "--convention=numpy",
+        "--add-ignore=D412"
+    ],
 }

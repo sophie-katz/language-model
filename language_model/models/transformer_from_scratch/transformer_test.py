@@ -2,23 +2,26 @@
 #
 # This file is part of Language Model.
 #
-# Language Model is free software: you can redistribute it and/or modify it under
-# the terms of the GNU General Public License as published by the Free Software
-# Foundation, either version 3 of the License, or (at your option) any later version.
+# Language Model is free software: you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software Foundation,
+# either version 3 of the License, or (at your option) any later version.
 #
-# Language Model is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# Language Model is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE. See the GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License along with Language
 # Model. If not, see <https://www.gnu.org/licenses/>.
 
-# This is heavily inspired by
-# https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch.
+"""Unit tests.
 
-import torch as T
-from .word_embedding import WordEmbedding
-from .transformer import Transformer
+This is heavily inspired by
+https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch.
+"""
+
+# import torch as T
+# from .word_embedding import WordEmbedding
+# from .transformer import Transformer
 
 
 # def test_transformer_simple_forward() -> None:
@@ -27,9 +30,11 @@ from .transformer import Transformer
 #     source_length = 13
 #     target_length = 17
 
-#     # TODO: Move embedding into transformer - https://www.notion.so/Move-word-embedding-into-transformer-426fe05f4e8f43998a70d198e053c751?pvs=4
+#     # TODO: Move embedding into transformer -
+# https://www.notion.so/Move-word-embedding-into-transformer-426fe05f4e8f43998a70d198e053c751?pvs=4
 #     # TODO: Should there be one embedding for encoding the source and one for decoding
-#     #       the target? - https://www.notion.so/Confirm-number-of-embedding-modules-2d49cf3367fc490986c834308b86813a?pvs=4
+#     #       the target? -
+# https://www.notion.so/Confirm-number-of-embedding-modules-2d49cf3367fc490986c834308b86813a?pvs=4
 #     word_embedding = WordEmbedding(vocabulary_size, embedding_size)
 
 #     transformer = Transformer(input_size=embedding_size)
