@@ -36,17 +36,17 @@ class FeedForward(nn.Sequential):
 
     input_size : int
         The size of the input tensor.
-    hidden_size : int
+    feed_forward_hidden_size : int
         The size of the hidden layer.
     """
 
     input_size: int
-    hidden_size: int
+    feed_forward_hidden_size: int
 
     def __post_init__(self) -> None:
         """Postinitialization for Pytorch module."""
         super().__init__(
-            nn.Linear(self.input_size, self.hidden_size),
+            nn.Linear(self.input_size, self.feed_forward_hidden_size),
             nn.ReLU(),
-            nn.Linear(self.hidden_size, self.input_size),
+            nn.Linear(self.feed_forward_hidden_size, self.input_size),
         )
