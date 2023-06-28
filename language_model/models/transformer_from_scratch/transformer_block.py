@@ -13,7 +13,10 @@
 # You should have received a copy of the GNU General Public License along with Language
 # Model. If not, see <https://www.gnu.org/licenses/>.
 
-"""The decoder block from a transformer.
+"""A block from a transformer.
+
+This could be either an encoder block or a decoder block. It is a base class to both
+blocks.
 
 This is heavily inspired by
 https://medium.com/the-dl/transformers-from-scratch-in-pytorch-8777e346ca51.
@@ -22,22 +25,25 @@ https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch
 was used to help with its implementation.
 """
 
+import abc
 import dataclasses
 
 import torch as T
+from torch import nn
 
+from language_model.models.transformer_from_scratch.feed_forward import FeedForward
 from language_model.models.transformer_from_scratch.multi_head_attention import (
     MultiHeadAttention,
 )
 from language_model.models.transformer_from_scratch.residual import Residual
-from language_model.models.transformer_from_scratch.transformer_block import (
-    TransformerBlock,
-)
 
 
 @dataclasses.dataclass
-class DecoderBlock(TransformerBlock):
-    """The decoder block from a transformer.
+class TransformerBlock(nn.Module, abc.ABC):
+    """A block from a transformer.
+
+    This could be either an encoder block or a decoder block. It is a base class to both
+    blocks.
 
     This is heavily inspired by
     https://medium.com/the-dl/transformers-from-scratch-in-pytorch-8777e346ca51.
@@ -47,15 +53,49 @@ class DecoderBlock(TransformerBlock):
 
     Attributes
     ----------
+    input_size : int
+        The size of the input tensor.
+    head_count : int
+        The number of attention heads to use.
+    feed_forward_hidden_size : int
+        The size of the hidden layer in the feed forward layer.
+    dropout_rate : float
+        The dropout rate for the residual layers.
+    query_size : int
+        The size of the query tensor.
+    key_size : int
+        The size of the key tensor.
+    value_size : int
+        The size of the value tensor.
     self_attention : Residual[MultiHeadAttention]
         The self attention layer.
+    attention : Residual[MultiHeadAttention]
+        The attention layer.
+    feed_forward : Residual[FeedForward]
+        The feed forward layer.
     """
 
-    self_attention: Residual[MultiHeadAttention] = dataclasses.field(init=False)
+    input_size: int
+    head_count: int
+    feed_forward_hidden_size: int
+    dropout_rate: float
+
+    query_size: int = dataclasses.field(init=False)
+    key_size: int = dataclasses.field(init=False)
+    value_size: int = dataclasses.field(init=False)
+
+    attention: Residual[MultiHeadAttention] = dataclasses.field(init=False)
+    feed_forward: Residual[FeedForward] = dataclasses.field(init=False)
 
     def __post_init__(self) -> None:
         """Postinitialization for Pytorch module."""
-        self.self_attention = Residual(
+        super().__init__()
+
+        self.query_size = max(self.input_size // self.head_count, 1)
+        self.key_size = max(self.input_size // self.head_count, 1)
+        self.value_size = max(self.input_size // self.head_count, 1)
+
+        self.attention = Residual(
             internal_layer=MultiHeadAttention(
                 head_count=self.head_count,
                 input_size=self.input_size,
@@ -67,22 +107,11 @@ class DecoderBlock(TransformerBlock):
             dropout_rate=self.dropout_rate,
         )
 
-    def forward(self, target: T.Tensor, memory: T.Tensor) -> T.Tensor:
-        """Forward function for network.
-
-        Parameters
-        ----------
-        target : T.Tensor
-            The target tensor to be decoded into input-like data.
-        memory : T.Tensor
-            The memory tensor of the original input data.
-
-        Returns
-        -------
-        T.Tensor
-            A single tensor. TODO: Find the size of this.
-        """
-        result: T.Tensor = self.self_attention(target, target, target)
-        result = self.attention(result, memory, memory)
-        result = self.feed_forward(result)
-        return result
+        self.feed_forward = Residual(
+            internal_layer=FeedForward(
+                input_size=self.input_size,
+                feed_forward_hidden_size=self.feed_forward_hidden_size,
+            ),
+            input_size=self.input_size,
+            dropout_rate=self.dropout_rate,
+        )
