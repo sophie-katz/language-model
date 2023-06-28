@@ -87,7 +87,8 @@ class Residual(nn.Module, Generic[InternalLayer]):
 
         assert all(
             tensor.ndim == 2 and tensor.size(0) == batch_size for tensor in tensors[1:]
-        ), "all tensors must be 2-dimensional (batches of vectors) and have the same batch size"
+        ), "all tensors must be 2-dimensional (batches of vectors) and have the same \
+            batch size"
 
         result: T.Tensor = self.internal_layer(*tensors)
 
