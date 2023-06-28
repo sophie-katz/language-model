@@ -67,8 +67,6 @@ class TransformerBlock(nn.Module, abc.ABC):
         The size of the key tensor.
     value_size : int
         The size of the value tensor.
-    self_attention : Residual[MultiHeadAttention]
-        The self attention layer.
     attention : Residual[MultiHeadAttention]
         The attention layer.
     feed_forward : Residual[FeedForward]

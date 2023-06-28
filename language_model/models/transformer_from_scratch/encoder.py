@@ -31,10 +31,13 @@ from language_model.models.transformer_from_scratch.encoder_block import Encoder
 from language_model.models.transformer_from_scratch.positional_encoding import (
     get_positional_encoding,
 )
+from language_model.models.transformer_from_scratch.transformer_pass import (
+    TransformerPass,
+)
 
 
 @dataclasses.dataclass
-class Encoder(nn.Module):
+class Encoder(TransformerPass):
     """The encoder from a transformer.
 
     This is heavily inspired by
@@ -42,49 +45,7 @@ class Encoder(nn.Module):
 
     https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch
     was used to help with its implementation.
-
-    Attributes
-    ----------
-    layer_count : int
-        The number of encoder block layers to use.
-    input_size : int
-        The size of the input tensor.
-    head_count : int
-        The number of attention heads to use.
-    feed_forward_hidden_size : int
-        The size of the hidden layer in the feed forward layer.
-    dropout_rate : float
-        The dropout rate for the residual layers.
-    positional_encoding_base : float
-        The exponentiation base to use for generating the positional encoding matrix.
-    layers : nn.ModuleList
-        The encoder block layers.
     """
-
-    layer_count: int
-    input_size: int
-    head_count: int
-    feed_forward_hidden_size: int
-    dropout_rate: float
-    positional_encoding_base: float
-
-    layers: nn.ModuleList = dataclasses.field(init=False)
-
-    def __post_init__(self) -> None:
-        """Postinitialization for Pytorch module."""
-        super().__init__()
-
-        self.layers = nn.ModuleList(
-            [
-                EncoderBlock(
-                    input_size=self.input_size,
-                    head_count=self.head_count,
-                    feed_forward_hidden_size=self.feed_forward_hidden_size,
-                    dropout_rate=self.dropout_rate,
-                )
-                for _ in range(self.layer_count)
-            ]
-        )
 
     def forward(self, source: T.Tensor) -> T.Tensor:
         """Forward function for network.
