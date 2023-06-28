@@ -77,6 +77,8 @@ class Decoder(TransformerPass):
         sequence_length = target.size(1)
         input_size = target.size(2)
 
+        target = self.word_embedding(target)
+
         # TODO: Possibly scale up embedding -
         # https://www.notion.so/Confirm-if-embedding-should-be-scaled-up-55f74b736e724bf0b40788873a9235ed?pvs=4
         # target *= self.input_size ** 0.5

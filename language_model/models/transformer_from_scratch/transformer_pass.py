@@ -24,17 +24,17 @@ https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch
 was used to help with its implementation.
 """
 
-
+import abc
 import dataclasses
 
-import torch as T
 from torch import nn
 
 from language_model.models.transformer_from_scratch.decoder_block import DecoderBlock
+from language_model.models.transformer_from_scratch.word_embedding import WordEmbedding
 
 
 @dataclasses.dataclass
-class TransformerPass(nn.Module):
+class TransformerPass(nn.Module, abc.ABC):
     """A single pass of a transformer.
 
     Can be used as a base class for either an encoder or a decoder.
@@ -59,6 +59,12 @@ class TransformerPass(nn.Module):
         The dropout rate for the residual layers.
     positional_encoding_base : float
         The exponentiation base to use for generating the positional encoding matrix.
+    vocabulary_size : int
+        The number of different words we expect to find in our input.
+    embedding_size : int
+        The size of the embedding vector for a given word.
+    word_embedding : WordEmbedding
+        The word embedding layer.
     layers : nn.ModuleList
         The decoder block layers.
     """
@@ -69,12 +75,17 @@ class TransformerPass(nn.Module):
     feed_forward_hidden_size: int
     dropout_rate: float
     positional_encoding_base: float
+    vocabulary_size: int
+    embedding_size: int
 
+    word_embedding: WordEmbedding = dataclasses.field(init=False)
     layers: nn.ModuleList = dataclasses.field(init=False)
 
     def __post_init__(self) -> None:
         """Postinitialization for Pytorch module."""
         super().__init__()
+
+        self.word_embedding = WordEmbedding(self.vocabulary_size, self.embedding_size)
 
         self.layers = nn.ModuleList(
             [
