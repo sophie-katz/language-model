@@ -73,16 +73,39 @@ class Residual(nn.Module, Generic[InternalLayer]):
         Returns
         -------
         T.Tensor
-            A single tensor. TODO: Find the size of this.
+            A result tensor that is the same shape as the first input tensor.
         """
-        # assert len(tensors) > 0
-        # assert tensors[0].ndim == 2
-        # assert tensors[0].size(-1) == self.input_size
-        # assert tensors[1].ndim == 2
-        # assert tensors[2].ndim == 2
+        assert len(tensors) > 0, "residual module needs at least one tensor as input"
+        assert (
+            tensors[0].ndim == 2
+        ), "all tensors in residual module must be 2-dimensional (batches of vectors)"
+        assert (
+            tensors[0].size(1) == self.input_size
+        ), f"first input tensor must be of expected input size: {self.input_size}"
+
+        batch_size = tensors[0].size(0)
+
+        assert all(
+            tensor.ndim == 2 and tensor.size(0) == batch_size for tensor in tensors[1:]
+        ), "all tensors must be 2-dimensional (batches of vectors) and have the same batch size"
 
         result: T.Tensor = self.internal_layer(*tensors)
+
+        assert (
+            result.shape == tensors[0].shape
+        ), "output of internal layer must be same shape as input"
+
         result = self.dropout(result)
+
+        assert (
+            result.shape == tensors[0].shape
+        ), "output of dropout must be same shape as input"
+
         result += tensors[0]
         result = self.normalization(result)
+
+        assert (
+            result.shape == tensors[0].shape
+        ), "output of normalization must be same shape as input"
+
         return result
