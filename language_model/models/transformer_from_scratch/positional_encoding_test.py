@@ -77,3 +77,11 @@ def test_positional_encoding_against_expected_values() -> None:
     assert abs(encoding[3, 1].item() - -0.9899925) < EPSILON
     assert abs(encoding[3, 2].item() - 0.29552021) < EPSILON
     assert abs(encoding[3, 3].item() - 0.95533649) < EPSILON
+
+
+def test_positional_encoding_untrained() -> None:
+    """Ensure that positional encoding won't get trained by backprop."""
+
+    encoding = get_positional_encoding(4, 4, 100)
+
+    assert not encoding.requires_grad
