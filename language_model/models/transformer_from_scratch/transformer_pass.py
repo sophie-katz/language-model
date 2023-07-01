@@ -27,9 +27,13 @@ was used to help with its implementation.
 import abc
 import dataclasses
 
+import torch as T
 from torch import nn
 
 from language_model.models.transformer_from_scratch.decoder_block import DecoderBlock
+from language_model.models.transformer_from_scratch.positional_encoding import (
+    get_positional_encoding,
+)
 from language_model.models.transformer_from_scratch.word_embedding import WordEmbedding
 
 
@@ -63,6 +67,8 @@ class TransformerPass(nn.Module, abc.ABC):
         The number of different words we expect to find in our input.
     embedding_size : int
         The size of the embedding vector for a given word.
+    max_sequence_length : int
+        The maximum length of a sequence.
     word_embedding : WordEmbedding
         The word embedding layer.
     layers : nn.ModuleList
@@ -77,9 +83,11 @@ class TransformerPass(nn.Module, abc.ABC):
     positional_encoding_base: float
     vocabulary_size: int
     embedding_size: int
+    max_sequence_length: int
 
     word_embedding: WordEmbedding = dataclasses.field(init=False)
     layers: nn.ModuleList = dataclasses.field(init=False)
+    positional_encoding: T.Tensor = dataclasses.field(init=False)
 
     def __post_init__(self) -> None:
         """Postinitialization for Pytorch module."""
@@ -97,4 +105,8 @@ class TransformerPass(nn.Module, abc.ABC):
                 )
                 for _ in range(self.layer_count)
             ]
+        )
+
+        self.positional_encoding = get_positional_encoding(
+            self.max_sequence_length, self.input_size, self.positional_encoding_base
         )

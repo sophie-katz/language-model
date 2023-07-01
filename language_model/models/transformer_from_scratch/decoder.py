@@ -28,10 +28,6 @@ import dataclasses
 import torch as T
 from torch import nn
 
-from language_model.models.transformer_from_scratch.decoder_block import DecoderBlock
-from language_model.models.transformer_from_scratch.positional_encoding import (
-    get_positional_encoding,
-)
 from language_model.models.transformer_from_scratch.transformer_pass import (
     TransformerPass,
 )
@@ -74,20 +70,13 @@ class Decoder(TransformerPass):
         T.Tensor
             A single tensor. TODO: Find the size of this.
         """
-        sequence_length = target.size(1)
-        input_size = target.size(2)
-
         target = self.word_embedding(target)
 
         # TODO: Possibly scale up embedding -
         # https://www.notion.so/Confirm-if-embedding-should-be-scaled-up-55f74b736e724bf0b40788873a9235ed?pvs=4
         # target *= self.input_size ** 0.5
 
-        # TODO: Pull this out of the forward function -
-        # https://www.notion.so/Pull-positional-encoding-out-of-the-forward-function-d034d6414f054f2aa163535c707182a3?pvs=4
-        target += get_positional_encoding(
-            sequence_length, input_size, self.positional_encoding_base
-        )
+        target += self.positional_encoding
 
         for layer in self.layers:
             target = layer(target, memory)

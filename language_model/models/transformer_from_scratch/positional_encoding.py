@@ -77,4 +77,6 @@ def get_positional_encoding(
     ), "encoding shape is unexpected, it should be a matrix of shape (sequence_length, \
         embedding_size)"
 
+    encoding.requires_grad = False
+
     return encoding

@@ -57,6 +57,12 @@ class Transformer(nn.Module):
         The dropout rate for the residual layers.
     positional_encoding_base : float
         The exponentiation base to use for generating the positional encoding matrix.
+    vocabulary_size : int
+        The number of different words we expect to find in our input.
+    embedding_size : int
+        The size of the embedding vector for a given word.
+    max_sequence_length : int
+        The maximum length of a sequence.
     encoder : Encoder
         The encoder part of the model.
     decoder : Decoder
@@ -70,6 +76,9 @@ class Transformer(nn.Module):
     feed_forward_hidden_size: int
     dropout_rate: float
     positional_encoding_base: float
+    vocabulary_size: int
+    embedding_size: int
+    max_sequence_length: int
 
     encoder: Encoder = dataclasses.field(init=False)
     decoder: Decoder = dataclasses.field(init=False)
@@ -85,6 +94,9 @@ class Transformer(nn.Module):
             feed_forward_hidden_size=self.feed_forward_hidden_size,
             dropout_rate=self.dropout_rate,
             positional_encoding_base=self.positional_encoding_base,
+            vocabulary_size=self.vocabulary_size,
+            embedding_size=self.embedding_size,
+            max_sequence_length=self.max_sequence_length,
         )
 
         self.decoder = Decoder(
@@ -94,6 +106,9 @@ class Transformer(nn.Module):
             feed_forward_hidden_size=self.feed_forward_hidden_size,
             dropout_rate=self.dropout_rate,
             positional_encoding_base=self.positional_encoding_base,
+            vocabulary_size=self.vocabulary_size,
+            embedding_size=self.embedding_size,
+            max_sequence_length=self.max_sequence_length,
         )
 
     def forward(self, source: T.Tensor, target: T.Tensor) -> T.Tensor:

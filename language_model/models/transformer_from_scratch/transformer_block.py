@@ -28,7 +28,6 @@ was used to help with its implementation.
 import abc
 import dataclasses
 
-import torch as T
 from torch import nn
 
 from language_model.models.transformer_from_scratch.feed_forward import FeedForward

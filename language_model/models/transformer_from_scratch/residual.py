@@ -75,6 +75,8 @@ class Residual(nn.Module, Generic[InternalLayer]):
         T.Tensor
             A result tensor that is the same shape as the first input tensor.
         """
+        # pylint: disable=magic-value-comparison
+
         assert len(tensors) > 0, "residual module needs at least one tensor as input"
         assert (
             tensors[0].ndim == 2

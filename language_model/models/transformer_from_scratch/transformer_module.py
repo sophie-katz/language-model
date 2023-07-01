@@ -23,6 +23,8 @@ import lightning
 class TransformerModule(lightning.LightningModule):
     """Lightning module for transformer."""
 
+    # pylint: disable=too-many-arguments
+
     def __init__(
         self,
         encoder_layer_count: int = 6,
