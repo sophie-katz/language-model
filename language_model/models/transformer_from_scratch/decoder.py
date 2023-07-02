@@ -29,7 +29,10 @@ import torch as T
 from torch import nn
 
 from language_model.models.transformer_from_scratch.decoder_block import DecoderBlock
-from language_model.models.transformer_from_scratch.shapes import get_sequence_length
+from language_model.models.transformer_from_scratch.shapes import (
+    get_sequence_batch_size,
+    get_sequence_length,
+)
 from language_model.models.transformer_from_scratch.transformer_pass import (
     TransformerPass,
 )
@@ -110,4 +113,20 @@ class Decoder(TransformerPass):
         for layer in self.layers:
             target = layer(target, memory, mask=mask)
 
-        return T.softmax(self.linear(target), dim=-1)
+        result: T.Tensor = self.linear(target)
+
+        assert result.shape == (
+            get_sequence_batch_size(target),
+            get_sequence_length(target),
+            self.word_embedding_feature_count,
+        )
+
+        result = T.softmax(result, dim=-1)
+
+        assert result.shape == (
+            get_sequence_batch_size(target),
+            get_sequence_length(target),
+            self.word_embedding_feature_count,
+        )
+
+        return result

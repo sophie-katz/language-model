@@ -143,3 +143,8 @@ class Transformer(nn.Module):
         memory: T.Tensor = self.encoder(source)
         result: T.Tensor = self.decoder(target, memory)
         return result
+
+    # TODO: Needs to be implemented
+    # https://www.notion.so/Implement-inference-70a9380b01774103b37dce5dfc398479?pvs=4
+    def infer(self) -> None:
+        raise NotImplementedError()

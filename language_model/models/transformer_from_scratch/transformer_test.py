@@ -73,8 +73,7 @@ def test_transformer_simple_forward() -> None:
 
     result = transformer(source, target)
 
-    # TODO: This is wrong
-    # https://www.notion.so/Transformer-output-must-be-one-word-at-a-time-794a1e4fb7524714a50e8749d1098b65?pvs=4
+    # For training we want the whole output sequence at a time
     assert result.shape == (
         batch_size,
         input_sequence_length,
