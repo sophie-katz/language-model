@@ -22,3 +22,4 @@ __pycache__
 
 # Training data
 lightning_logs/
+.data

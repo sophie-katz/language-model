@@ -35,6 +35,9 @@ lightning = "^2.0.2"
 gradio = "^3.33.1"
 scipy = "^1.10.1"
 seaborn = "^0.12.2"
+torchtext = "^0.15.2"
+portalocker = "^2.7.0"
+torchdata = "^0.6.1"
 
 [tool.poetry.group.dev.dependencies]
 pylance = "^0.4.4"
