@@ -22,6 +22,8 @@ https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch
 was used to help with its implementation.
 """
 
+from typing import Optional
+
 import torch as T
 import torch.nn.functional as F
 
@@ -30,8 +32,11 @@ from language_model.models.transformer_from_scratch.shapes import (
     get_sequence_length,
 )
 
+# Doesn't need to be a hyperparameter because it's basically just -inf but finite
+MASK_FILL_VALUE = -1e20
 
-def attention(qkv: QKV) -> T.Tensor:
+
+def attention(qkv: QKV, mask: Optional[T.Tensor] = None) -> T.Tensor:
     """Compute attention for a single head.
 
     Parameters
@@ -61,6 +66,15 @@ def attention(qkv: QKV) -> T.Tensor:
 
     # TODO: Apply mask
     # - https://www.notion.so/Apply-mask-a0a22426e0a94a3aa7d49abc21075fb9?pvs=4
+
+    if mask is not None:
+        assert mask.shape == (
+            get_sequence_length(qkv.query),
+            get_sequence_length(qkv.key),
+        ), "mask must have the same shape as the score matrix, except for the batch \
+            dimension"
+
+        score = score.masked_fill(mask == 0, MASK_FILL_VALUE)
 
     weight = F.softmax(score / qkv.feature_count**0.5)
 

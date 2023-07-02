@@ -51,3 +51,53 @@ def test_attention_shapes() -> None:
     result = attention(QKV(query, key, value))
 
     assert result.shape == (batch_size, query_sequence_length, feature_count)
+
+
+def test_attention_mask_tril() -> None:
+    """Test masking with attention."""
+    batch_size = 64
+    query_sequence_length = 4
+    key_and_value_sequence_length = 5
+    feature_count = 512
+
+    query = T.rand(batch_size, query_sequence_length, feature_count)
+    key = T.rand(batch_size, key_and_value_sequence_length, feature_count)
+    value = T.rand(batch_size, key_and_value_sequence_length, feature_count)
+
+    mask = T.tril(T.ones((query_sequence_length, key_and_value_sequence_length)))
+
+    result_without_mask = attention(QKV(query, key, value))
+    result_with_mask = attention(QKV(query, key, value), mask=mask)
+
+    assert result_without_mask.shape == (
+        batch_size,
+        query_sequence_length,
+        feature_count,
+    )
+
+    assert (result_with_mask != result_without_mask).any()
+
+
+def test_attention_mask_ones() -> None:
+    """Test masking with attention."""
+    batch_size = 64
+    query_sequence_length = 4
+    key_and_value_sequence_length = 5
+    feature_count = 512
+
+    query = T.rand(batch_size, query_sequence_length, feature_count)
+    key = T.rand(batch_size, key_and_value_sequence_length, feature_count)
+    value = T.rand(batch_size, key_and_value_sequence_length, feature_count)
+
+    mask = T.ones((query_sequence_length, key_and_value_sequence_length))
+
+    result_without_mask = attention(QKV(query, key, value))
+    result_with_mask = attention(QKV(query, key, value), mask=mask)
+
+    assert result_without_mask.shape == (
+        batch_size,
+        query_sequence_length,
+        feature_count,
+    )
+
+    assert not (result_with_mask != result_without_mask).any()

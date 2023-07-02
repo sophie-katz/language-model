@@ -20,6 +20,7 @@ https://medium.com/the-dl/transformers-from-scratch-in-pytorch-8777e346ca51.
 """
 
 import dataclasses
+from typing import Optional
 
 import torch as T
 from torch import nn
@@ -71,7 +72,7 @@ class AttentionHead(nn.Module):
         self.key_linear = nn.Linear(self.input_feature_count, self.qkv_feature_count)
         self.value_linear = nn.Linear(self.input_feature_count, self.qkv_feature_count)
 
-    def forward(self, qkv: QKV) -> T.Tensor:
+    def forward(self, qkv: QKV, mask: Optional[T.Tensor] = None) -> T.Tensor:
         """Forward function for network.
 
         Parameters
@@ -99,7 +100,8 @@ class AttentionHead(nn.Module):
                 self.query_linear(qkv.query),
                 self.key_linear(qkv.key),
                 self.value_linear(qkv.value),
-            )
+            ),
+            mask=mask,
         )
 
         assert result.shape == (

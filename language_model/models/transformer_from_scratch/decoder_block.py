@@ -23,6 +23,7 @@ was used to help with its implementation.
 """
 
 import dataclasses
+from typing import Optional
 
 import torch as T
 
@@ -68,7 +69,9 @@ class DecoderBlock(TransformerBlock):
             dropout_rate=self.residual_dropout_rate,
         )
 
-    def forward(self, target: T.Tensor, memory: T.Tensor) -> T.Tensor:
+    def forward(
+        self, target: T.Tensor, memory: T.Tensor, mask: Optional[T.Tensor] = None
+    ) -> T.Tensor:
         """Forward function for network.
 
         Parameters
@@ -83,7 +86,7 @@ class DecoderBlock(TransformerBlock):
         T.Tensor
             A single tensor. TODO: Find the size of this.
         """
-        result: T.Tensor = self.self_attention(QKV(target, target, target))
+        result: T.Tensor = self.self_attention(QKV(target, target, target), mask=mask)
         result = self.attention(QKV(result, memory, memory))
         result = self.feed_forward(result)
         return result

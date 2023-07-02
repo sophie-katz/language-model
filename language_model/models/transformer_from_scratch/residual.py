@@ -23,7 +23,7 @@ used to help with its implementation.
 """
 
 import dataclasses
-from typing import Generic, TypeVar, Union
+from typing import Any, Generic, TypeVar, Union
 
 import torch as T
 from torch import nn
@@ -65,7 +65,7 @@ class Residual(nn.Module, Generic[InternalLayer]):
         self.normalization = nn.LayerNorm(self.input_feature_count)
         self.dropout = nn.Dropout(self.dropout_rate)
 
-    def forward(self, *tensors: Union[T.Tensor, QKV]) -> T.Tensor:
+    def forward(self, *tensors: Union[T.Tensor, QKV], **kwargs: Any) -> T.Tensor:
         """Forward function for network.
 
         Parameters
@@ -96,7 +96,7 @@ class Residual(nn.Module, Generic[InternalLayer]):
             ), f"query, key, and value tensors must all be of the expected input size:\
                     {self.input_feature_count}"
 
-            result = self.internal_layer(qkv)
+            result = self.internal_layer(qkv, **kwargs)
 
             assert (
                 result.shape == qkv.query.shape
@@ -130,7 +130,7 @@ class Residual(nn.Module, Generic[InternalLayer]):
                 for tensor in tensors[1:]
             ), "all tensors must have the same batch size"
 
-            result = self.internal_layer(*tensors)
+            result = self.internal_layer(*tensors, **kwargs)
 
             assert (
                 result.shape == tensors[0].shape

@@ -29,6 +29,7 @@ import torch as T
 from torch import nn
 
 from language_model.models.transformer_from_scratch.decoder_block import DecoderBlock
+from language_model.models.transformer_from_scratch.shapes import get_sequence_length
 from language_model.models.transformer_from_scratch.transformer_pass import (
     TransformerPass,
 )
@@ -104,7 +105,9 @@ class Decoder(TransformerPass):
 
         target += self.positional_encoding[..., : target.size(1), :]
 
+        mask = T.tril(T.ones(get_sequence_length(target), get_sequence_length(target)))
+
         for layer in self.layers:
-            target = layer(target, memory)
+            target = layer(target, memory, mask=mask)
 
         return T.softmax(self.linear(target), dim=-1)

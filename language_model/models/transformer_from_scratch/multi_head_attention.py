@@ -23,6 +23,7 @@ was used to help with its implementation.
 """
 
 import dataclasses
+from typing import Optional
 
 import torch as T
 from torch import nn
@@ -86,7 +87,7 @@ class MultiHeadAttention(nn.Module):
             self.head_count * self.qkv_feature_count, self.input_feature_count
         )
 
-    def forward(self, qkv: QKV) -> T.Tensor:
+    def forward(self, qkv: QKV, mask: Optional[T.Tensor] = None) -> T.Tensor:
         """Forward function for network.
 
         Parameters
@@ -102,7 +103,7 @@ class MultiHeadAttention(nn.Module):
         T.Tensor
             A single tensor. TODO: Find the size of this.
         """
-        head_results = [head(qkv) for head in self.heads]
+        head_results = [head(qkv, mask=mask) for head in self.heads]
 
         result: T.Tensor = T.cat(
             head_results,
