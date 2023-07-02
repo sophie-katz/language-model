@@ -25,7 +25,8 @@ https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch
 was used to help with its implementation.
 """
 
-import abc
+# pylint: disable=abstract-method
+
 import dataclasses
 
 from torch import nn
@@ -38,7 +39,7 @@ from language_model.models.transformer_from_scratch.residual import Residual
 
 
 @dataclasses.dataclass
-class TransformerBlock(nn.Module, abc.ABC):
+class TransformerBlock(nn.Module):
     """A block from a transformer.
 
     This could be either an encoder block or a decoder block. It is a base class to both
@@ -72,43 +73,46 @@ class TransformerBlock(nn.Module, abc.ABC):
         The feed forward layer.
     """
 
-    input_size: int
+    input_feature_count: int
     head_count: int
-    feed_forward_hidden_size: int
-    dropout_rate: float
+    feed_forward_hidden_feature_count: int
+    residual_dropout_rate: float
 
-    query_size: int = dataclasses.field(init=False)
-    key_size: int = dataclasses.field(init=False)
-    value_size: int = dataclasses.field(init=False)
+    qkv_feature_count: int = dataclasses.field(init=False)
 
     attention: Residual[MultiHeadAttention] = dataclasses.field(init=False)
     feed_forward: Residual[FeedForward] = dataclasses.field(init=False)
 
     def __post_init__(self) -> None:
         """Postinitialization for Pytorch module."""
+        # pylint: disable=unidiomatic-typecheck
+
         super().__init__()
 
-        self.query_size = max(self.input_size // self.head_count, 1)
-        self.key_size = max(self.input_size // self.head_count, 1)
-        self.value_size = max(self.input_size // self.head_count, 1)
+        if type(self) == TransformerBlock:
+            raise TypeError(
+                "TransformerBlock is an abstract class and cannot be instantiated."
+            )
+
+        self.qkv_feature_count = max(self.input_feature_count // self.head_count, 1)
 
         self.attention = Residual(
             internal_layer=MultiHeadAttention(
                 head_count=self.head_count,
-                input_size=self.input_size,
-                query_size=self.query_size,
-                key_size=self.key_size,
-                value_size=self.value_size,
+                input_feature_count=self.input_feature_count,
+                qkv_feature_count=self.qkv_feature_count,
             ),
-            input_size=self.input_size,
-            dropout_rate=self.dropout_rate,
+            input_feature_count=self.input_feature_count,
+            dropout_rate=self.residual_dropout_rate,
+        )
+
+        feed_forward_internal = FeedForward(
+            input_feature_count=self.input_feature_count,
+            feed_forward_hidden_feature_count=self.feed_forward_hidden_feature_count,
         )
 
         self.feed_forward = Residual(
-            internal_layer=FeedForward(
-                input_size=self.input_size,
-                feed_forward_hidden_size=self.feed_forward_hidden_size,
-            ),
-            input_size=self.input_size,
-            dropout_rate=self.dropout_rate,
+            internal_layer=feed_forward_internal,
+            input_feature_count=self.input_feature_count,
+            dropout_rate=self.residual_dropout_rate,
         )

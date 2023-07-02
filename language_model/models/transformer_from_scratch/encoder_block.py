@@ -26,6 +26,7 @@ import dataclasses
 
 import torch as T
 
+from language_model.models.transformer_from_scratch.qkv import QKV
 from language_model.models.transformer_from_scratch.transformer_block import (
     TransformerBlock,
 )
@@ -55,6 +56,6 @@ class EncoderBlock(TransformerBlock):
         T.Tensor
             A single tensor. TODO: Find the size of this.
         """
-        result: T.Tensor = self.attention(source, source, source)
-        result = self.feed_forward(source)
+        result: T.Tensor = self.attention(QKV(source, source, source))
+        result = self.feed_forward(result)
         return result

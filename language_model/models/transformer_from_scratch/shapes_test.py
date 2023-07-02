@@ -30,9 +30,9 @@ from language_model.models.transformer_from_scratch.shapes import (
 def test_has_sequence_shape() -> None:
     """Test function."""
     assert has_sequence_shape(T.zeros(1, 1, 2))
+    assert has_sequence_shape(T.zeros(1, 1, 1))
     assert not has_sequence_shape(T.zeros(1, 2))
     assert not has_sequence_shape(T.zeros(1, 1, 1, 2))
-    assert not has_sequence_shape(T.zeros(1, 1, 1))
 
 
 def test_get_sequence_batch_size() -> None:

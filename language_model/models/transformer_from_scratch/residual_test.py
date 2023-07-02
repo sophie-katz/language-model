@@ -16,27 +16,25 @@
 """Unit tests."""
 
 import torch as T
+from torch import nn
 
-from language_model.models.transformer_from_scratch.word_embedding import WordEmbedding
+from language_model.models.transformer_from_scratch.residual import Residual
 
 
-def test_word_embedding() -> None:
-    """Test the shape of word embeddings."""
+def test_residual() -> None:
+    """Test initialization and shape of feed forward layer of transformer."""
     batch_size = 2
-    vocabulary_size = 3
-    sentence_length = 4
-    feature_count = 8
+    input_feature_count = 4
+    dropout_rate = 0.1
 
-    word_embedding_layer = WordEmbedding(vocabulary_size, feature_count)
-
-    word_indices = T.randint(
-        vocabulary_size,
-        (
-            batch_size,
-            sentence_length,
-        ),
+    residual: Residual[nn.Linear] = Residual(
+        internal_layer=nn.Linear(input_feature_count, input_feature_count),
+        input_feature_count=input_feature_count,
+        dropout_rate=dropout_rate,
     )
 
-    word_embeddings = word_embedding_layer(word_indices)
+    input_tensor = T.rand(batch_size, input_feature_count)
 
-    assert word_embeddings.shape == (batch_size, sentence_length, feature_count)
+    result = residual(input_tensor)
+
+    assert result.shape == (batch_size, input_feature_count)

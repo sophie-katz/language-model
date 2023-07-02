@@ -30,7 +30,6 @@ import dataclasses
 import torch as T
 from torch import nn
 
-from language_model.models.transformer_from_scratch.decoder_block import DecoderBlock
 from language_model.models.transformer_from_scratch.positional_encoding import (
     get_positional_encoding,
 )
@@ -65,7 +64,7 @@ class TransformerPass(nn.Module, abc.ABC):
         The exponentiation base to use for generating the positional encoding matrix.
     vocabulary_size : int
         The number of different words we expect to find in our input.
-    embedding_size : int
+    word_embedding_feature_count : int
         The size of the embedding vector for a given word.
     max_sequence_length : int
         The maximum length of a sequence.
@@ -76,37 +75,36 @@ class TransformerPass(nn.Module, abc.ABC):
     """
 
     layer_count: int
-    input_size: int
-    head_count: int
-    feed_forward_hidden_size: int
-    dropout_rate: float
+    word_embedding_vocabulary_size: int
+    word_embedding_feature_count: int
+    positional_encoding_max_sequence_length: int
     positional_encoding_base: float
-    vocabulary_size: int
-    embedding_size: int
-    max_sequence_length: int
 
     word_embedding: WordEmbedding = dataclasses.field(init=False)
-    layers: nn.ModuleList = dataclasses.field(init=False)
     positional_encoding: T.Tensor = dataclasses.field(init=False)
 
     def __post_init__(self) -> None:
         """Postinitialization for Pytorch module."""
         super().__init__()
 
-        self.word_embedding = WordEmbedding(self.vocabulary_size, self.embedding_size)
-
-        self.layers = nn.ModuleList(
-            [
-                DecoderBlock(
-                    input_size=self.input_size,
-                    head_count=self.head_count,
-                    feed_forward_hidden_size=self.feed_forward_hidden_size,
-                    dropout_rate=self.dropout_rate,
-                )
-                for _ in range(self.layer_count)
-            ]
+        self.word_embedding = WordEmbedding(
+            self.word_embedding_vocabulary_size, self.word_embedding_feature_count
         )
 
+        # self.layers = nn.ModuleList(
+        #     [
+        #         DecoderBlock(
+        #             input_size=self.input_size,
+        #             head_count=self.head_count,
+        #             feed_forward_hidden_size=self.feed_forward_hidden_size,
+        #             dropout_rate=self.dropout_rate,
+        #         )
+        #         for _ in range(self.layer_count)
+        #     ]
+        # )
+
         self.positional_encoding = get_positional_encoding(
-            self.max_sequence_length, self.input_size, self.positional_encoding_base
+            self.positional_encoding_max_sequence_length,
+            self.word_embedding_feature_count,
+            self.positional_encoding_base,
         )

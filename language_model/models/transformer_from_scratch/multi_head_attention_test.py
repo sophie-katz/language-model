@@ -17,27 +17,30 @@
 
 import torch as T
 
-from language_model.models.transformer_from_scratch.attention_head import AttentionHead
+from language_model.models.transformer_from_scratch.multi_head_attention import (
+    MultiHeadAttention,
+)
 from language_model.models.transformer_from_scratch.qkv import QKV
 
 
-def test_attention_head_simple() -> None:
-    """Test initialization and shapes for attention head in a simple case."""
+def test_multi_head_attention_simple() -> None:
+    """Test initialization and shapes for multi-head attention in a simple case."""
     batch_size = 2
     input_sequence_length = 4
-    output_sequence_length = 5
     input_feature_count = 3
-    qkv_feature_count = 6
+    head_count = 6
+    qkv_feature_count = 7
 
     query = T.rand(batch_size, input_sequence_length, input_feature_count)
-    key = T.rand(batch_size, output_sequence_length, input_feature_count)
-    value = T.rand(batch_size, output_sequence_length, input_feature_count)
+    key = T.rand(batch_size, input_sequence_length, input_feature_count)
+    value = T.rand(batch_size, input_sequence_length, input_feature_count)
 
-    attention_head = AttentionHead(
+    multi_head_attention = MultiHeadAttention(
+        head_count=head_count,
         input_feature_count=input_feature_count,
         qkv_feature_count=qkv_feature_count,
     )
 
-    result = attention_head(QKV(query=query, key=key, value=value))
+    result = multi_head_attention(QKV(query=query, key=key, value=value))
 
-    assert result.shape == (batch_size, input_sequence_length, qkv_feature_count)
+    assert result.shape == (batch_size, input_sequence_length, input_feature_count)

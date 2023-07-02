@@ -25,7 +25,9 @@ was used to help with its implementation.
 import dataclasses
 
 import torch as T
+from torch import nn
 
+from language_model.models.transformer_from_scratch.encoder_block import EncoderBlock
 from language_model.models.transformer_from_scratch.transformer_pass import (
     TransformerPass,
 )
@@ -41,6 +43,32 @@ class Encoder(TransformerPass):
     https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch
     was used to help with its implementation.
     """
+
+    encoder_block_head_count: int
+    encoder_block_feed_forward_hidden_feature_count: int
+    encoder_block_residual_dropout_rate: float
+
+    layers: nn.ModuleList = dataclasses.field(init=False)
+
+    def __post_init__(self) -> None:
+        """Postinitialization for Pytorch module."""
+        super().__post_init__()
+
+        # fmt: off
+        self.layers = nn.ModuleList(
+            [
+                EncoderBlock(
+                    input_feature_count=self.word_embedding_feature_count,
+                    head_count=self.encoder_block_head_count,
+                    feed_forward_hidden_feature_count=(
+                        self.encoder_block_feed_forward_hidden_feature_count
+                    ),
+                    residual_dropout_rate=self.encoder_block_residual_dropout_rate,
+                )
+                for _ in range(self.layer_count)
+            ]
+        )
+        # fmt: on
 
     def forward(self, source: T.Tensor) -> T.Tensor:
         """Forward function for network.
@@ -61,7 +89,7 @@ class Encoder(TransformerPass):
         # https://www.notion.so/Confirm-if-embedding-should-be-scaled-up-55f74b736e724bf0b40788873a9235ed?pvs=4
         # source *= self.input_size ** 0.5
 
-        source += self.positional_encoding
+        source += self.positional_encoding[..., : source.size(1), :]
 
         for layer in self.layers:
             source = layer(source)

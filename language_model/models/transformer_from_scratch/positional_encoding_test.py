@@ -15,7 +15,6 @@
 
 """Unit tests."""
 
-# import torch as T
 import math
 
 from language_model.models.transformer_from_scratch.positional_encoding import (
@@ -81,7 +80,25 @@ def test_positional_encoding_against_expected_values() -> None:
 
 def test_positional_encoding_untrained() -> None:
     """Ensure that positional encoding won't get trained by backprop."""
-
     encoding = get_positional_encoding(4, 4, 100)
 
     assert not encoding.requires_grad
+
+
+def test_positional_encoding_values() -> None:
+    """Ensure that positional encoding values are within expected ranges."""
+    encoding = get_positional_encoding(4096, 512, 1e4)
+
+    count = 0
+
+    for value in encoding.view(-1):
+        value_item = value.item()
+
+        assert not math.isnan(value_item)
+        assert not math.isinf(value_item)
+        assert value_item >= -1.0
+        assert value_item <= 1.0
+
+        count += 1
+
+    assert count == 4096 * 512

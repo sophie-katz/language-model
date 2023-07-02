@@ -17,26 +17,22 @@
 
 import torch as T
 
-from language_model.models.transformer_from_scratch.word_embedding import WordEmbedding
+from language_model.models.transformer_from_scratch.feed_forward import FeedForward
 
 
-def test_word_embedding() -> None:
-    """Test the shape of word embeddings."""
+def test_feed_forward() -> None:
+    """Test initialization and shape of feed forward layer of transformer."""
     batch_size = 2
-    vocabulary_size = 3
-    sentence_length = 4
-    feature_count = 8
+    input_feature_count = 4
+    feed_forward_hidden_feature_count = 6
 
-    word_embedding_layer = WordEmbedding(vocabulary_size, feature_count)
-
-    word_indices = T.randint(
-        vocabulary_size,
-        (
-            batch_size,
-            sentence_length,
-        ),
+    feed_forward = FeedForward(
+        input_feature_count=input_feature_count,
+        feed_forward_hidden_feature_count=feed_forward_hidden_feature_count,
     )
 
-    word_embeddings = word_embedding_layer(word_indices)
+    input_tensor = T.rand(batch_size, input_feature_count)
 
-    assert word_embeddings.shape == (batch_size, sentence_length, feature_count)
+    result = feed_forward(input_tensor)
+
+    assert result.shape == (batch_size, input_feature_count)

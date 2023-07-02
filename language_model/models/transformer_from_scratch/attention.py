@@ -26,7 +26,9 @@ import torch as T
 import torch.nn.functional as F
 
 from language_model.models.transformer_from_scratch.qkv import QKV
-from language_model.models.transformer_from_scratch.shapes import get_sequence_length
+from language_model.models.transformer_from_scratch.shapes import (
+    get_sequence_length,
+)
 
 
 def attention(qkv: QKV) -> T.Tensor:
@@ -41,9 +43,13 @@ def attention(qkv: QKV) -> T.Tensor:
     Returns
     -------
     T.Tensor
-        A tensor containing the result of the attention calculation. TODO: Find the size
-        of this.
+        A tensor containing the result of the attention calculation. The tensor should
+        be of shape `(batch_size, query_sequence_length, feature_count)`.
     """
+    assert get_sequence_length(qkv.key) == get_sequence_length(
+        qkv.value
+    ), "key and value sequences must have the same length"
+
     score = qkv.query.bmm(qkv.key.transpose(1, 2))
 
     assert score.shape == (

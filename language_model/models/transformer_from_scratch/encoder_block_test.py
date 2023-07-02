@@ -17,26 +17,27 @@
 
 import torch as T
 
-from language_model.models.transformer_from_scratch.word_embedding import WordEmbedding
+from language_model.models.transformer_from_scratch.encoder_block import EncoderBlock
 
 
-def test_word_embedding() -> None:
-    """Test the shape of word embeddings."""
+def test_encoder_block() -> None:
+    """Test initialization and shape of encoder block."""
     batch_size = 2
-    vocabulary_size = 3
-    sentence_length = 4
-    feature_count = 8
+    input_sequence_length = 5
+    input_feature_count = 4
+    head_count = 6
+    feed_forward_hidden_feature_count = 8
+    residual_dropout_rate = 0.1
 
-    word_embedding_layer = WordEmbedding(vocabulary_size, feature_count)
-
-    word_indices = T.randint(
-        vocabulary_size,
-        (
-            batch_size,
-            sentence_length,
-        ),
+    encoder_block = EncoderBlock(
+        input_feature_count=input_feature_count,
+        head_count=head_count,
+        feed_forward_hidden_feature_count=feed_forward_hidden_feature_count,
+        residual_dropout_rate=residual_dropout_rate,
     )
 
-    word_embeddings = word_embedding_layer(word_indices)
+    source = T.rand(batch_size, input_sequence_length, input_feature_count)
 
-    assert word_embeddings.shape == (batch_size, sentence_length, feature_count)
+    result = encoder_block(source)
+
+    assert result.shape == (batch_size, input_sequence_length, input_feature_count)

@@ -52,11 +52,11 @@ class QKV:
 
         assert has_sequence_shape(
             self.key
-        ), "query must be of shape (batch_size, sequence_length, feature_count)"
+        ), "key must be of shape (batch_size, sequence_length, feature_count)"
 
         assert has_sequence_shape(
             self.value
-        ), "query must be of shape (batch_size, sequence_length, feature_count)"
+        ), "value must be of shape (batch_size, sequence_length, feature_count)"
 
         assert (
             get_sequence_batch_size(self.query)

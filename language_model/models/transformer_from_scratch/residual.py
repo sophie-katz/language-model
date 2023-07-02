@@ -23,10 +23,12 @@ used to help with its implementation.
 """
 
 import dataclasses
-from typing import Generic, TypeVar
+from typing import Generic, TypeVar, Union
 
 import torch as T
 from torch import nn
+
+from language_model.models.transformer_from_scratch.qkv import QKV
 
 InternalLayer = TypeVar("InternalLayer", bound=nn.Module)
 
@@ -45,29 +47,30 @@ class Residual(nn.Module, Generic[InternalLayer]):
     ----------
     internal_layer : InternalLayer
         The internal layer of the residual module.
-    input_size : int
+    input_feature_count : int
         The size of the input tensor.
     dropout_rate : float
         The dropout rate for the residual layers.
     """
 
-    internal_layer: InternalLayer
-    input_size: int
+    internal_layer: dataclasses.InitVar[InternalLayer]
+    input_feature_count: int
     dropout_rate: float
 
-    def __post_init__(self) -> None:
+    def __post_init__(self, internal_layer: InternalLayer) -> None:
         """Postinitialization for Pytorch module."""
         super().__init__()
 
-        self.normalization = nn.LayerNorm(self.input_size)
+        self.internal_layer = internal_layer
+        self.normalization = nn.LayerNorm(self.input_feature_count)
         self.dropout = nn.Dropout(self.dropout_rate)
 
-    def forward(self, *tensors: T.Tensor) -> T.Tensor:
+    def forward(self, *tensors: Union[T.Tensor, QKV]) -> T.Tensor:
         """Forward function for network.
 
         Parameters
         ----------
-        *tensors : T.Tensor
+        *tensors : Union[T.Tensor, QKV]
             The list of tensors to pass as input to the residual.
 
         Returns
@@ -77,38 +80,73 @@ class Residual(nn.Module, Generic[InternalLayer]):
         """
         # pylint: disable=magic-value-comparison
 
+        assert isinstance(
+            self.internal_layer, nn.Module
+        ), "internal layer must be a Pytorch module"
         assert len(tensors) > 0, "residual module needs at least one tensor as input"
-        assert (
-            tensors[0].ndim == 2
-        ), "all tensors in residual module must be 2-dimensional (batches of vectors)"
-        assert (
-            tensors[0].size(1) == self.input_size
-        ), f"first input tensor must be of expected input size: {self.input_size}"
 
-        batch_size = tensors[0].size(0)
+        result: T.Tensor
 
-        assert all(
-            tensor.ndim == 2 and tensor.size(0) == batch_size for tensor in tensors[1:]
-        ), "all tensors must be 2-dimensional (batches of vectors) and have the same \
-            batch size"
+        if isinstance(tensors[0], QKV):
+            assert len(tensors) == 1, "residual module needs exactly one QKV as input"
 
-        result: T.Tensor = self.internal_layer(*tensors)
+            qkv = tensors[0]
+            assert (
+                qkv.feature_count == self.input_feature_count
+            ), f"query, key, and value tensors must all be of the expected input size:\
+                    {self.input_feature_count}"
 
-        assert (
-            result.shape == tensors[0].shape
-        ), "output of internal layer must be same shape as input"
+            result = self.internal_layer(qkv)
 
-        result = self.dropout(result)
+            assert (
+                result.shape == qkv.query.shape
+            ), "output of internal layer must be same shape as query"
 
-        assert (
-            result.shape == tensors[0].shape
-        ), "output of dropout must be same shape as input"
+            result = self.dropout(result)
 
-        result += tensors[0]
-        result = self.normalization(result)
+            assert (
+                result.shape == qkv.query.shape
+            ), "output of dropout must be same shape as query"
 
-        assert (
-            result.shape == tensors[0].shape
-        ), "output of normalization must be same shape as input"
+            result += qkv.query
+            result = self.normalization(result)
+
+            assert (
+                result.shape == qkv.query.shape
+            ), "output of normalization must be same shape as query"
+        else:
+            assert tensors[0].ndim > 1, "all tensors in residual module must be batched"
+            assert (
+                tensors[0].size(-1) == self.input_feature_count
+            ), f"first input tensor must be of expected input size: \
+                {self.input_feature_count}"
+
+            batch_size = tensors[0].size(0)
+
+            assert all(
+                isinstance(tensor, T.Tensor)
+                and tensor.ndim > 1
+                and tensor.size(0) == batch_size
+                for tensor in tensors[1:]
+            ), "all tensors must have the same batch size"
+
+            result = self.internal_layer(*tensors)
+
+            assert (
+                result.shape == tensors[0].shape
+            ), "output of internal layer must be same shape as input"
+
+            result = self.dropout(result)
+
+            assert (
+                result.shape == tensors[0].shape
+            ), "output of dropout must be same shape as input"
+
+            result += tensors[0]
+            result = self.normalization(result)
+
+            assert (
+                result.shape == tensors[0].shape
+            ), "output of normalization must be same shape as input"
 
         return result

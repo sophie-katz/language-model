@@ -71,14 +71,16 @@ class Transformer(nn.Module):
 
     encoder_layer_count: int
     decoder_layer_count: int
-    input_size: int
-    head_count: int
-    feed_forward_hidden_size: int
-    dropout_rate: float
+    word_embedding_vocabulary_size: int
+    word_embedding_feature_count: int
+    positional_encoding_max_sequence_length: int
     positional_encoding_base: float
-    vocabulary_size: int
-    embedding_size: int
-    max_sequence_length: int
+    encoder_block_head_count: int
+    encoder_block_feed_forward_hidden_feature_count: int
+    encoder_block_residual_dropout_rate: float
+    decoder_block_head_count: int
+    decoder_block_feed_forward_hidden_feature_count: int
+    decoder_block_residual_dropout_rate: float
 
     encoder: Encoder = dataclasses.field(init=False)
     decoder: Decoder = dataclasses.field(init=False)
@@ -87,28 +89,40 @@ class Transformer(nn.Module):
         """Postinitialization for Pytorch module."""
         super().__init__()
 
+        # fmt: off
         self.encoder = Encoder(
             layer_count=self.encoder_layer_count,
-            input_size=self.input_size,
-            head_count=self.head_count,
-            feed_forward_hidden_size=self.feed_forward_hidden_size,
-            dropout_rate=self.dropout_rate,
+            word_embedding_vocabulary_size=self.word_embedding_vocabulary_size,
+            word_embedding_feature_count=self.word_embedding_feature_count,
+            positional_encoding_max_sequence_length=(
+                self.positional_encoding_max_sequence_length
+            ),
             positional_encoding_base=self.positional_encoding_base,
-            vocabulary_size=self.vocabulary_size,
-            embedding_size=self.embedding_size,
-            max_sequence_length=self.max_sequence_length,
+            encoder_block_head_count=self.encoder_block_head_count,
+            encoder_block_feed_forward_hidden_feature_count=(
+                self.encoder_block_feed_forward_hidden_feature_count
+            ),
+            encoder_block_residual_dropout_rate=(
+                self.encoder_block_residual_dropout_rate
+            ),
         )
+        # fmt: on
 
         self.decoder = Decoder(
             layer_count=self.decoder_layer_count,
-            input_size=self.input_size,
-            head_count=self.head_count,
-            feed_forward_hidden_size=self.feed_forward_hidden_size,
-            dropout_rate=self.dropout_rate,
+            word_embedding_vocabulary_size=self.word_embedding_vocabulary_size,
+            word_embedding_feature_count=self.word_embedding_feature_count,
+            positional_encoding_max_sequence_length=(
+                self.positional_encoding_max_sequence_length
+            ),
             positional_encoding_base=self.positional_encoding_base,
-            vocabulary_size=self.vocabulary_size,
-            embedding_size=self.embedding_size,
-            max_sequence_length=self.max_sequence_length,
+            decoder_block_head_count=self.decoder_block_head_count,
+            decoder_block_feed_forward_hidden_feature_count=(
+                self.decoder_block_feed_forward_hidden_feature_count
+            ),
+            decoder_block_residual_dropout_rate=(
+                self.decoder_block_residual_dropout_rate
+            ),
         )
 
     def forward(self, source: T.Tensor, target: T.Tensor) -> T.Tensor:
@@ -126,6 +140,6 @@ class Transformer(nn.Module):
         T.Tensor
             A single tensor. TODO: Find the size of this.
         """
-        result: T.Tensor = self.encoder(source)
-        result = self.decoder(target, result)
+        memory: T.Tensor = self.encoder(source)
+        result: T.Tensor = self.decoder(target, memory)
         return result

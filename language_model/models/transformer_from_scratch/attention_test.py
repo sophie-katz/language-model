@@ -17,23 +17,37 @@
 
 import torch as T
 
+from language_model.models.transformer_from_scratch.attention import attention
 from language_model.models.transformer_from_scratch.qkv import QKV
 
-from language_model.models.transformer_from_scratch.attention import attention
 
+def test_attention_simple() -> None:
+    """Test attention in a simple case."""
+    batch_size = 2
+    input_sequence_length = 4
+    output_sequence_length = 5
+    feature_count = 3
 
-def test_attention() -> None:
-    """Test attention shapes.
-
-    Batch size: 2
-    Input sequence length: 4
-    Output sequence length: 5
-    Feature count: 3
-    """
-    query = T.rand(2, 5, 3)
-    key = T.rand(2, 4, 3)
-    value = T.rand(2, 4, 3)
+    query = T.rand(batch_size, input_sequence_length, feature_count)
+    key = T.rand(batch_size, output_sequence_length, feature_count)
+    value = T.rand(batch_size, output_sequence_length, feature_count)
 
     result = attention(QKV(query, key, value))
 
-    assert result.shape == (2, 5, 3)
+    assert result.shape == (batch_size, input_sequence_length, feature_count)
+
+
+def test_attention_shapes() -> None:
+    """Test attention shapes in a more complicated case."""
+    batch_size = 64
+    query_sequence_length = 4
+    key_and_value_sequence_length = 5
+    feature_count = 512
+
+    query = T.rand(batch_size, query_sequence_length, feature_count)
+    key = T.rand(batch_size, key_and_value_sequence_length, feature_count)
+    value = T.rand(batch_size, key_and_value_sequence_length, feature_count)
+
+    result = attention(QKV(query, key, value))
+
+    assert result.shape == (batch_size, query_sequence_length, feature_count)

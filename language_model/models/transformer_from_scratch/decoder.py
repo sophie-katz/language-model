@@ -28,6 +28,7 @@ import dataclasses
 import torch as T
 from torch import nn
 
+from language_model.models.transformer_from_scratch.decoder_block import DecoderBlock
 from language_model.models.transformer_from_scratch.transformer_pass import (
     TransformerPass,
 )
@@ -49,11 +50,36 @@ class Decoder(TransformerPass):
         The linear layer to increase dimensionality.
     """
 
+    decoder_block_head_count: int
+    decoder_block_feed_forward_hidden_feature_count: int
+    decoder_block_residual_dropout_rate: float
+
+    layers: nn.ModuleList = dataclasses.field(init=False)
     linear: nn.Linear = dataclasses.field(init=False)
 
     def __post_init__(self) -> None:
         """Postinitialization for Pytorch module."""
-        self.linear = nn.Linear(self.input_size, self.input_size)
+        super().__post_init__()
+
+        # fmt: off
+        self.layers = nn.ModuleList(
+            [
+                DecoderBlock(
+                    input_feature_count=self.word_embedding_feature_count,
+                    head_count=self.decoder_block_head_count,
+                    feed_forward_hidden_feature_count=(
+                        self.decoder_block_feed_forward_hidden_feature_count
+                    ),
+                    residual_dropout_rate=self.decoder_block_residual_dropout_rate,
+                )
+                for _ in range(self.layer_count)
+            ]
+        )
+        # fmt: on
+
+        self.linear = nn.Linear(
+            self.word_embedding_feature_count, self.word_embedding_feature_count
+        )
 
     def forward(self, target: T.Tensor, memory: T.Tensor) -> T.Tensor:
         """Forward function for network.
@@ -76,7 +102,7 @@ class Decoder(TransformerPass):
         # https://www.notion.so/Confirm-if-embedding-should-be-scaled-up-55f74b736e724bf0b40788873a9235ed?pvs=4
         # target *= self.input_size ** 0.5
 
-        target += self.positional_encoding
+        target += self.positional_encoding[..., : target.size(1), :]
 
         for layer in self.layers:
             target = layer(target, memory)

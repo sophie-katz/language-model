@@ -39,7 +39,7 @@ def has_sequence_shape(tensor: T.Tensor) -> bool:
     bool
         Whether or not the tensor has the shape of a sequence.
     """
-    return tensor.ndim == 3 and tensor.size(2) > 1
+    return tensor.ndim == 3 and tensor.size(2) > 0
 
 
 def get_sequence_batch_size(tensor: T.Tensor) -> int:

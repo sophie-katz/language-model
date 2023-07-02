@@ -40,13 +40,13 @@ class FeedForward(nn.Sequential):
         The size of the hidden layer.
     """
 
-    input_size: int
-    feed_forward_hidden_size: int
+    input_feature_count: int
+    feed_forward_hidden_feature_count: int
 
     def __post_init__(self) -> None:
         """Postinitialization for Pytorch module."""
         super().__init__(
-            nn.Linear(self.input_size, self.feed_forward_hidden_size),
+            nn.Linear(self.input_feature_count, self.feed_forward_hidden_feature_count),
             nn.ReLU(),
-            nn.Linear(self.feed_forward_hidden_size, self.input_size),
+            nn.Linear(self.feed_forward_hidden_feature_count, self.input_feature_count),
         )

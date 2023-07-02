@@ -13,24 +13,18 @@
 # You should have received a copy of the GNU General Public License along with Language
 # Model. If not, see <https://www.gnu.org/licenses/>.
 
-"""Unit tests.
-
-This is heavily inspired by
-https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch.
-"""
+"""Unit tests."""
 
 import torch as T
-from language_model.models.transformer_from_scratch.transformer import Transformer
+
+from language_model.models.transformer_from_scratch.encoder import Encoder
 
 
-def test_transformer_simple_forward() -> None:
+def test_encoder() -> None:
     """Test initialization and shape of encoder."""
-    # pylint: disable=too-many-locals
-
     batch_size = 2
     input_sequence_length = 5
-    encoder_layer_count = 3
-    decoder_layer_count = 3
+    layer_count = 3
     word_embedding_vocabulary_size = 13
     word_embedding_feature_count = 512
     positional_encoding_max_sequence_length = 4096
@@ -38,14 +32,10 @@ def test_transformer_simple_forward() -> None:
     encoder_block_head_count = 6
     encoder_block_feed_forward_hidden_feature_count = 8
     encoder_block_residual_dropout_rate = 0.1
-    decoder_block_head_count = 6
-    decoder_block_feed_forward_hidden_feature_count = 8
-    decoder_block_residual_dropout_rate = 0.1
 
     # fmt: off
-    transformer = Transformer(
-        encoder_layer_count=encoder_layer_count,
-        decoder_layer_count=decoder_layer_count,
+    encoder = Encoder(
+        layer_count=layer_count,
         word_embedding_vocabulary_size=word_embedding_vocabulary_size,
         word_embedding_feature_count=word_embedding_feature_count,
         positional_encoding_max_sequence_length=positional_encoding_max_sequence_length,
@@ -54,12 +44,9 @@ def test_transformer_simple_forward() -> None:
         encoder_block_feed_forward_hidden_feature_count=(
             encoder_block_feed_forward_hidden_feature_count
         ),
-        encoder_block_residual_dropout_rate=encoder_block_residual_dropout_rate,
-        decoder_block_head_count=decoder_block_head_count,
-        decoder_block_feed_forward_hidden_feature_count=(
-            decoder_block_feed_forward_hidden_feature_count
+        encoder_block_residual_dropout_rate=(
+            encoder_block_residual_dropout_rate
         ),
-        decoder_block_residual_dropout_rate=decoder_block_residual_dropout_rate,
     )
     # fmt: on
 
@@ -67,14 +54,8 @@ def test_transformer_simple_forward() -> None:
         word_embedding_vocabulary_size, (batch_size, input_sequence_length)
     )
 
-    target = T.randint(
-        word_embedding_vocabulary_size, (batch_size, input_sequence_length)
-    )
+    result = encoder(source)
 
-    result = transformer(source, target)
-
-    # TODO: This is wrong
-    # https://www.notion.so/Transformer-output-must-be-one-word-at-a-time-794a1e4fb7524714a50e8749d1098b65?pvs=4
     assert result.shape == (
         batch_size,
         input_sequence_length,

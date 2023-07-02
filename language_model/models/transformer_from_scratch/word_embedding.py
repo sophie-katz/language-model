@@ -35,20 +35,20 @@ class WordEmbedding(nn.Module):
 
     This module expects as input a tensor of word indices within the vocabulary of shape
     `(sentence_length,)`. It returns a tensor of word embeddings of shape
-    `(sentence_length, embedding_size)`.
+    `(sentence_length, feature_count)`.
 
     Attributes
     ----------
     vocabulary_size : int
         The number of different words we expect to find in our input.
-    embedding_size : int
+    feature_count : int
         The size of the embedding vector for a given word.
     embedding : nn.Embedding
         The embedding layer.
     """
 
     vocabulary_size: int
-    embedding_size: int
+    feature_count: int
 
     embedding: nn.Embedding = dataclasses.field(init=False)
 
@@ -57,7 +57,7 @@ class WordEmbedding(nn.Module):
         super().__init__()
 
         # We use Pytorch's built in embedding layer
-        self.embedding = nn.Embedding(self.vocabulary_size, self.embedding_size)
+        self.embedding = nn.Embedding(self.vocabulary_size, self.feature_count)
 
     def forward(self, sentence: T.Tensor) -> T.Tensor:
         """Forward function for network.
@@ -71,18 +71,22 @@ class WordEmbedding(nn.Module):
         Returns
         -------
         T.Tensor
-            A single tensor of shape `(sentence_length, embedding_size)` that contains
-            the embedding.
+            A single tensor of shape `(sentence_length, feature_count)`
+            that contains the embedding.
         """
         # pylint: disable=magic-value-comparison
 
-        assert sentence.ndim == 1, "input sentence should be a vector of word indices"
+        assert (
+            sentence.ndim == 2
+        ), "input sentence should be a batch of vectors of word indices"
 
         result: T.Tensor = self.embedding(sentence)
 
         assert result.shape == (
             sentence.size(0),
-            self.embedding_size,
-        ), "embedding should be a matrix of shape (sentence_length, embedding_size)"
+            sentence.size(1),
+            self.feature_count,
+        ), "embedding should be a matrix of shape \
+            (batch_size, sentence_length, feature_count)"
 
         return result

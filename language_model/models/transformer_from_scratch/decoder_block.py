@@ -29,6 +29,7 @@ import torch as T
 from language_model.models.transformer_from_scratch.multi_head_attention import (
     MultiHeadAttention,
 )
+from language_model.models.transformer_from_scratch.qkv import QKV
 from language_model.models.transformer_from_scratch.residual import Residual
 from language_model.models.transformer_from_scratch.transformer_block import (
     TransformerBlock,
@@ -55,16 +56,16 @@ class DecoderBlock(TransformerBlock):
 
     def __post_init__(self) -> None:
         """Postinitialization for Pytorch module."""
+        super().__post_init__()
+
         self.self_attention = Residual(
             internal_layer=MultiHeadAttention(
                 head_count=self.head_count,
-                input_size=self.input_size,
-                query_size=self.query_size,
-                key_size=self.key_size,
-                value_size=self.value_size,
+                input_feature_count=self.input_feature_count,
+                qkv_feature_count=self.qkv_feature_count,
             ),
-            input_size=self.input_size,
-            dropout_rate=self.dropout_rate,
+            input_feature_count=self.input_feature_count,
+            dropout_rate=self.residual_dropout_rate,
         )
 
     def forward(self, target: T.Tensor, memory: T.Tensor) -> T.Tensor:
@@ -82,7 +83,7 @@ class DecoderBlock(TransformerBlock):
         T.Tensor
             A single tensor. TODO: Find the size of this.
         """
-        result: T.Tensor = self.self_attention(target, target, target)
-        result = self.attention(result, memory, memory)
+        result: T.Tensor = self.self_attention(QKV(target, target, target))
+        result = self.attention(QKV(result, memory, memory))
         result = self.feed_forward(result)
         return result

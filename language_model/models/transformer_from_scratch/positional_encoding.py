@@ -43,11 +43,12 @@ def get_positional_encoding(
     Returns
     -------
     T.Tensor
-        A tensor of shape (sequence_length, embedding_size) containing the positional
+        A tensor of shape `(sequence_length, embedding_size)` containing the positional
         encoding matrix for the given sequence length and embedding size.
     """
     assert sequence_length > 0, "sequences must be non-empty"
     assert embedding_size > 0, "embeddings must have at least 1 feature"
+    assert base > 0, "base must be positive"
 
     exponent = (
         T.repeat_interleave(

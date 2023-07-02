@@ -25,8 +25,10 @@ import torch as T
 from torch import nn
 
 from language_model.models.transformer_from_scratch.qkv import QKV
-
 from language_model.models.transformer_from_scratch.attention import attention
+from language_model.models.transformer_from_scratch.shapes import (
+    get_sequence_length,
+)
 
 
 @dataclasses.dataclass
@@ -54,10 +56,8 @@ class AttentionHead(nn.Module):
         The linear layer for the value tensor.
     """
 
-    input_size: int
-    query_size: int
-    key_size: int
-    value_size: int
+    input_feature_count: int
+    qkv_feature_count: int
 
     query_linear: nn.Linear = dataclasses.field(init=False)
     key_linear: nn.Linear = dataclasses.field(init=False)
@@ -67,9 +67,9 @@ class AttentionHead(nn.Module):
         """Postinitialization for Pytorch module."""
         super().__init__()
 
-        self.query_linear = nn.Linear(self.input_size, self.query_size)
-        self.key_linear = nn.Linear(self.input_size, self.key_size)
-        self.value_linear = nn.Linear(self.input_size, self.value_size)
+        self.query_linear = nn.Linear(self.input_feature_count, self.qkv_feature_count)
+        self.key_linear = nn.Linear(self.input_feature_count, self.qkv_feature_count)
+        self.value_linear = nn.Linear(self.input_feature_count, self.qkv_feature_count)
 
     def forward(self, qkv: QKV) -> T.Tensor:
         """Forward function for network.
@@ -78,23 +78,34 @@ class AttentionHead(nn.Module):
         ----------
         qkv : QKV
             The query, key, and value matrices to use as input to attention. Each of
-            them should be of shape `(batch_size, sequence_length, feature_count)`. Note
-            that each of the three matrices may have different feature counts, although
-            they will all have the same batch size and sequence length.
+            them should be of shape
+            `(batch_size, sequence_length, input_feature_count)`. Note that each of the
+            three matrices may have different feature counts, although they will all
+            have the same batch size and sequence length.
 
         Returns
         -------
         T.Tensor
-            A single tensor. TODO: Find the size of this.
+            A tensor containing the result of the attention calculation. The tensor
+            should be of shape
+            `(batch_size, query_sequence_length, query_feature_count)`.
         """
         assert (
-            self.input_size == qkv.feature_count
-        ), "QKV tensors must have the feature count equal to input size"
+            self.input_feature_count == qkv.feature_count
+        ), "QKV tensors must have the feature count equal to input feature count"
 
-        return attention(
+        result = attention(
             QKV(
                 self.query_linear(qkv.query),
                 self.key_linear(qkv.key),
                 self.value_linear(qkv.value),
             )
         )
+
+        assert result.shape == (
+            qkv.batch_size,
+            get_sequence_length(qkv.query),
+            self.qkv_feature_count,
+        )
+
+        return result
