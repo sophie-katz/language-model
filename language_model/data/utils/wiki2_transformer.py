@@ -15,7 +15,7 @@
 
 """Create data pipeline for Wiki-2 corpus in use by transformers."""
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
 import torchtext.vocab
 from language_model.data.data_pipelines.build_vocabulary_from_tokens import (
     BuildVocabularyFromTokens,
@@ -30,7 +30,7 @@ from language_model.data.data_pipelines.split_sentences_by_index import (
 
 def get_wiki2_transformer_datapipe(
     strings: Iterable[str],
-) -> tuple[torchtext.vocab.Vocab, Iterable[list[list[int]]]]:
+) -> tuple[torchtext.vocab.Vocab, Iterator[list[list[int]]]]:
     """Create data pipeline for Wiki-2 corpus in use by transformers."""
     datapipe_tokens_unfiltered = SimpleSpaceSplit(strings)
     datapipe_tokens_filtered = FilterTokens(datapipe_tokens_unfiltered, {"@-@"})
@@ -40,5 +40,4 @@ def get_wiki2_transformer_datapipe(
     datapipe_sentences = SplitSentencesByIndex(
         datapipe_indices, datapipe_indices.vocabulary["."]
     )
-
     return datapipe_indices.vocabulary, datapipe_sentences
