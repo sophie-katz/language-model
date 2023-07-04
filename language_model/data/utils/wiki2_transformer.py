@@ -16,12 +16,17 @@
 """Create data pipeline for Wiki-2 corpus in use by transformers."""
 
 from collections.abc import Iterable, Iterator
+from typing import Optional
+
 import torchtext.vocab
+
+from language_model.data.data_pipelines.apply_vocabulary_to_tokens import (
+    ApplyVocabularyToTokens,
+)
 from language_model.data.data_pipelines.build_vocabulary_from_tokens import (
     BuildVocabularyFromTokens,
 )
 from language_model.data.data_pipelines.filter_tokens import FilterTokens
-
 from language_model.data.data_pipelines.simple_space_split import SimpleSpaceSplit
 from language_model.data.data_pipelines.split_sentences_by_index import (
     SplitSentencesByIndex,
@@ -30,14 +35,23 @@ from language_model.data.data_pipelines.split_sentences_by_index import (
 
 def get_wiki2_transformer_datapipe(
     strings: Iterable[str],
+    vocabulary: Optional[torchtext.vocab.Vocab] = None,
 ) -> tuple[torchtext.vocab.Vocab, Iterator[list[list[int]]]]:
     """Create data pipeline for Wiki-2 corpus in use by transformers."""
+    # pylint: disable=consider-ternary-expression
+
     datapipe_tokens_unfiltered = SimpleSpaceSplit(strings)
     datapipe_tokens_filtered = FilterTokens(datapipe_tokens_unfiltered, {"@-@"})
-    datapipe_indices = BuildVocabularyFromTokens(
-        datapipe_tokens_filtered, specials=["<unk>"]
-    )
-    datapipe_sentences = SplitSentencesByIndex(
-        datapipe_indices, datapipe_indices.vocabulary["."]
-    )
-    return datapipe_indices.vocabulary, datapipe_sentences
+
+    if vocabulary is None:
+        datapipe_indices = BuildVocabularyFromTokens(
+            datapipe_tokens_filtered, specials=["<unk>"]
+        )
+
+        vocabulary = datapipe_indices.vocabulary
+    else:
+        datapipe_indices = ApplyVocabularyToTokens(datapipe_tokens_filtered, vocabulary)
+
+    datapipe_sentences = SplitSentencesByIndex(datapipe_indices, vocabulary["."])
+
+    return vocabulary, datapipe_sentences

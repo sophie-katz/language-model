@@ -17,28 +17,21 @@
 
 # pylint: disable=magic-value-comparison
 
+import torchdata.datapipes as dp
 import torchtext.vocab
 
-from language_model.data.utils.wiki2_transformer import get_wiki2_transformer_datapipe
+from language_model.data.data_pipelines.apply_vocabulary_to_tokens import (
+    ApplyVocabularyToTokens,
+)
 
 
 def test_simple() -> None:
     """Test the simplest case."""
-    _, datapipe = get_wiki2_transformer_datapipe(["a b .", "c d . ef ."])
-
-    assert [list(example) for example in datapipe] == [[[2, 3]], [[4, 5], [6]]]
-
-
-def test_with_vocabulary() -> None:
-    """Test the simplest case."""
     vocabulary = torchtext.vocab.build_vocab_from_iterator(
-        [["a", "b", ".", "c", "ef"]], specials=["<unk>"]
+        [["a", "ab", "ac"]], specials=["<unk>"]
     )
 
-    vocabulary.set_default_index(vocabulary["<unk>"])
+    datapipe = dp.iter.IterableWrapper([["a"], ["ab", "ac", "<unk>"]])
+    datapipe = ApplyVocabularyToTokens(datapipe, vocabulary)
 
-    _, datapipe = get_wiki2_transformer_datapipe(
-        ["a b .", "c d . ef ."], vocabulary=vocabulary
-    )
-
-    assert [list(example) for example in datapipe] == [[[2, 3]], [[4, 0], [5]]]
+    assert [list(example) for example in datapipe] == [[1], [2, 3, 0]]
