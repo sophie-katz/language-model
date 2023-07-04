@@ -33,7 +33,7 @@ from language_model.models.transformer_from_scratch.transformer_pass import (
 )
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(unsafe_hash=True)
 class Encoder(TransformerPass):
     """The encoder from a transformer.
 

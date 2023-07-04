@@ -32,7 +32,7 @@ from language_model.models.transformer_from_scratch.attention_head import Attent
 from language_model.models.transformer_from_scratch.qkv import QKV
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(unsafe_hash=True)
 class MultiHeadAttention(nn.Module):
     """A multi-head attention module from a transformer.
 

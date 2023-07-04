@@ -27,7 +27,7 @@ import torch as T
 from torch import nn
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(unsafe_hash=True)
 class WordEmbedding(nn.Module):
     """A simple word embedding model.
 
@@ -78,7 +78,7 @@ class WordEmbedding(nn.Module):
 
         assert (
             sentence.ndim == 2
-        ), "input sentence should be a batch of vectors of word indices"
+        ), f"input sentence should be a batch of vectors of word indices, not {sentence.shape}"
 
         result: T.Tensor = self.embedding(sentence)
 

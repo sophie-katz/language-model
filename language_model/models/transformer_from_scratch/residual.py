@@ -33,7 +33,7 @@ from language_model.models.transformer_from_scratch.qkv import QKV
 InternalLayer = TypeVar("InternalLayer", bound=nn.Module)
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(unsafe_hash=True)
 class Residual(nn.Module, Generic[InternalLayer]):
     """A residual module from a transformer.
 

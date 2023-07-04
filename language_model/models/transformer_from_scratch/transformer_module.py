@@ -15,25 +15,36 @@
 
 """Lightning module for transformer."""
 
-import lightning
+from typing import Any
 
-# from language_model.models.transformer_from_scratch.transformer import Transformer
+import lightning as L
+import torch.optim
+import torch as T
+import torch.nn.functional as F
+
+from language_model.models.transformer_from_scratch.transformer import Transformer
 
 
-class TransformerModule(lightning.LightningModule):
+class TransformerModule(L.LightningModule):
     """Lightning module for transformer."""
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,arguments-differ
 
     def __init__(
         self,
+        word_embedding_vocabulary_size: int,
         encoder_layer_count: int = 6,
         decoder_layer_count: int = 6,
-        input_size: int = 512,
-        head_count: int = 6,
-        feed_forward_hidden_size: int = 2048,
-        dropout_rate: float = 0.1,
+        word_embedding_feature_count: int = 512,
+        positional_encoding_max_sequence_length: int = 4096,
         positional_encoding_base: float = 1e4,
+        encoder_block_head_count: int = 6,
+        encoder_block_feed_forward_hidden_feature_count: int = 4096,
+        encoder_block_residual_dropout_rate: float = 0.1,
+        decoder_block_head_count: int = 6,
+        decoder_block_feed_forward_hidden_feature_count: int = 4096,
+        decoder_block_residual_dropout_rate: float = 0.1,
+        learning_rate: float = 1e-3,
     ) -> None:
         """Initialize the module.
 
@@ -41,19 +52,97 @@ class TransformerModule(lightning.LightningModule):
         """
         super().__init__()
 
+        self.hparams.word_embedding_vocabulary_size = (  # type: ignore
+            word_embedding_vocabulary_size
+        )
         self.hparams.encoder_layer_count = encoder_layer_count  # type: ignore
         self.hparams.decoder_layer_count = decoder_layer_count  # type: ignore
-        self.hparams.input_size = input_size  # type: ignore
-        self.hparams.head_count = head_count  # type: ignore
-        self.hparams.feed_forward_hidden_size = feed_forward_hidden_size  # type: ignore
-        self.hparams.dropout_rate = dropout_rate  # type: ignore
+        self.hparams.word_embedding_feature_count = (  # type: ignore
+            word_embedding_feature_count
+        )
+        self.hparams.positional_encoding_max_sequence_length = (  # type: ignore
+            positional_encoding_max_sequence_length
+        )
         self.hparams.positional_encoding_base = positional_encoding_base  # type: ignore
+        self.hparams.encoder_block_head_count = encoder_block_head_count  # type: ignore
+        self.hparams.encoder_block_feed_forward_hidden_feature_count = (  # type: ignore
+            encoder_block_feed_forward_hidden_feature_count
+        )
+        self.hparams.encoder_block_residual_dropout_rate = (  # type: ignore
+            encoder_block_residual_dropout_rate
+        )
+        self.hparams.decoder_block_head_count = decoder_block_head_count  # type: ignore
+        self.hparams.decoder_block_feed_forward_hidden_feature_count = (  # type: ignore
+            decoder_block_feed_forward_hidden_feature_count
+        )
+        self.hparams.decoder_block_residual_dropout_rate = (  # type: ignore
+            decoder_block_residual_dropout_rate
+        )
+        self.hparams.learning_rate = learning_rate  # type: ignore
 
-        # self.transformer = Transformer(
-        #     encoder_layer_count=encoder_layer_count,
-        #     decoder_layer_count=decoder_layer_count,
-        #     input_size=input_size,
-        #     head_count=head_count,
-        #     feed_forward_hidden_size=feed_forward_hidden_size,
-        #     dropout_rate=dropout_rate,
-        # )
+        self.transformer = self._create_transformer()
+
+    def training_step(self, batch: Any, _: int) -> T.Tensor:
+        """Perform a training step."""
+        batch = T.tensor(batch, dtype=T.long)
+
+        assert (
+            batch.ndim == 2
+        ), f"input sentence should be a batch of vectors of word indices, not {batch.shape}"
+
+        source = target = batch
+
+        prediction = self.transformer(source, target)
+
+        loss = F.cross_entropy(prediction, target)
+
+        self.log("train_loss", loss)
+
+        return loss
+
+    def configure_optimizers(self) -> Any:
+        """Configure the optimizer."""
+        return torch.optim.Adam(
+            self.parameters(), lr=self.hparams.learning_rate  # type: ignore
+        )
+
+    def _create_transformer(self) -> Transformer:
+        """Create the transformer."""
+        # fmt: off
+        return Transformer(
+            encoder_layer_count=self.hparams.encoder_layer_count,  # type: ignore
+            decoder_layer_count=self.hparams.decoder_layer_count,  # type: ignore
+            word_embedding_vocabulary_size=(
+                self.hparams.word_embedding_vocabulary_size  # type: ignore
+            ),
+            word_embedding_feature_count=(
+                self.hparams.word_embedding_feature_count  # type: ignore
+            ),
+            positional_encoding_max_sequence_length=(
+                self.hparams.positional_encoding_max_sequence_length  # type: ignore
+            ),
+            positional_encoding_base=(
+                self.hparams.positional_encoding_base  # type: ignore
+            ),
+            encoder_block_head_count=(
+                self.hparams.encoder_block_head_count  # type: ignore
+            ),
+            encoder_block_feed_forward_hidden_feature_count=(
+                self.hparams
+                    .encoder_block_feed_forward_hidden_feature_count  # type: ignore
+            ),
+            encoder_block_residual_dropout_rate=(
+                self.hparams.encoder_block_residual_dropout_rate  # type: ignore
+            ),
+            decoder_block_head_count=(
+                self.hparams.decoder_block_head_count  # type: ignore
+            ),
+            decoder_block_feed_forward_hidden_feature_count=(
+                self.hparams
+                    .decoder_block_feed_forward_hidden_feature_count  # type: ignore
+            ),
+            decoder_block_residual_dropout_rate=(
+                self.hparams.decoder_block_residual_dropout_rate  # type: ignore
+            ),
+        )
+        # fmt: on

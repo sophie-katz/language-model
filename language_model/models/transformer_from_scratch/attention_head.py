@@ -32,7 +32,7 @@ from language_model.models.transformer_from_scratch.shapes import (
 )
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(unsafe_hash=True)
 class AttentionHead(nn.Module):
     """A single attention head for use in a transformer model.
 

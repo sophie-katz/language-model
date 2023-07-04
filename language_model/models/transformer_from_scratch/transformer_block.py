@@ -38,7 +38,7 @@ from language_model.models.transformer_from_scratch.multi_head_attention import 
 from language_model.models.transformer_from_scratch.residual import Residual
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(unsafe_hash=True)
 class TransformerBlock(nn.Module):
     """A block from a transformer.
 

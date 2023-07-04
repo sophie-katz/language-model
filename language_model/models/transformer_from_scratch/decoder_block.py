@@ -37,7 +37,7 @@ from language_model.models.transformer_from_scratch.transformer_block import (
 )
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(unsafe_hash=True)
 class DecoderBlock(TransformerBlock):
     """The decoder block from a transformer.
 

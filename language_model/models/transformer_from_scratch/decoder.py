@@ -38,7 +38,7 @@ from language_model.models.transformer_from_scratch.transformer_pass import (
 )
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(unsafe_hash=True)
 class Decoder(TransformerPass):
     """The decoder from a transformer.
 

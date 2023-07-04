@@ -24,7 +24,7 @@ import dataclasses
 from torch import nn
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(unsafe_hash=True)
 class FeedForward(nn.Sequential):
     """Feed forward network module for use in a transformer.
 

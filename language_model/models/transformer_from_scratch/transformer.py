@@ -31,7 +31,7 @@ from language_model.models.transformer_from_scratch.decoder import Decoder
 from language_model.models.transformer_from_scratch.encoder import Encoder
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(unsafe_hash=True)
 class Transformer(nn.Module):
     """Transformer model.
 
@@ -147,4 +147,5 @@ class Transformer(nn.Module):
     # TODO: Needs to be implemented
     # https://www.notion.so/Implement-inference-70a9380b01774103b37dce5dfc398479?pvs=4
     def infer(self) -> None:
+        """Inferer."""
         raise NotImplementedError()

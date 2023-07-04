@@ -36,7 +36,7 @@ from language_model.models.transformer_from_scratch.positional_encoding import (
 from language_model.models.transformer_from_scratch.word_embedding import WordEmbedding
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(unsafe_hash=True)
 class TransformerPass(nn.Module, abc.ABC):
     """A single pass of a transformer.
 
