@@ -61,7 +61,8 @@ class Residual(nn.Module, Generic[InternalLayer]):
         """Postinitialization for Pytorch module."""
         super().__init__()
 
-        self.internal_layer = internal_layer
+        # self.internal_layer = internal_layer
+        self.add_module("internal_layer", internal_layer)
         self.normalization = nn.LayerNorm(self.input_feature_count)
         self.dropout = nn.Dropout(self.dropout_rate)
 

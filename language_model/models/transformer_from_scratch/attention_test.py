@@ -15,6 +15,7 @@
 
 """Unit tests."""
 
+import pytest
 import torch as T
 
 from language_model.models.transformer_from_scratch.attention import attention
@@ -35,6 +36,23 @@ def test_attention_simple() -> None:
     result = attention(QKV(query, key, value))
 
     assert result.shape == (batch_size, input_sequence_length, feature_count)
+
+
+@pytest.mark.skipif(not T.cuda.is_available(), reason="CUDA not available")
+def test_attention_cuda() -> None:
+    """CUDA."""
+    batch_size = 2
+    input_sequence_length = 4
+    output_sequence_length = 5
+    feature_count = 3
+
+    query = T.rand(batch_size, input_sequence_length, feature_count).cuda()
+    key = T.rand(batch_size, output_sequence_length, feature_count).cuda()
+    value = T.rand(batch_size, output_sequence_length, feature_count).cuda()
+
+    result = attention(QKV(query, key, value))
+
+    assert result.device.type == "cuda"
 
 
 def test_attention_shapes() -> None:

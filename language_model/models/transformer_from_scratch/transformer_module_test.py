@@ -15,8 +15,12 @@
 
 """Unit tests."""
 
+import lightning as L
 import torch as T
+import torch.utils.data
+from torchtext.datasets import WikiText2
 
+from language_model.data.utils.wiki2_transformer import get_wiki2_transformer_datapipe
 from language_model.models.transformer_from_scratch.transformer_module import (
     TransformerModule,
 )
@@ -36,5 +40,21 @@ def test_transformer_module_training_step() -> None:
     loss = transformer_module.training_step([[1, 4, 8]], 0)
 
     assert isinstance(loss, T.Tensor)
-    assert loss.shape == (1,)
+    assert loss.ndim == 0
     assert loss.item() > 0
+
+
+def test_integration() -> None:
+    """Simple."""
+    train = WikiText2(root=".data", split="train")
+
+    vocabulary, train_datapipe = get_wiki2_transformer_datapipe(train)
+    vocabulary.set_default_index(vocabulary["<unk>"])
+
+    train_dataloader = torch.utils.data.DataLoader(train_datapipe)  # type: ignore
+
+    transformer_module = TransformerModule(len(vocabulary))
+
+    trainer = L.Trainer(max_epochs=1)
+
+    trainer.fit(transformer_module, train_dataloader)

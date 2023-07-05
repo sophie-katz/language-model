@@ -78,7 +78,8 @@ class WordEmbedding(nn.Module):
 
         assert (
             sentence.ndim == 2
-        ), f"input sentence should be a batch of vectors of word indices, not {sentence.shape}"
+        ), f"input sentence should be a batch of vectors of word indices, \
+            not {sentence.shape}"
 
         result: T.Tensor = self.embedding(sentence)
 

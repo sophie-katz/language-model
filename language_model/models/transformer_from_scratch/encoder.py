@@ -89,7 +89,7 @@ class Encoder(TransformerPass):
         # https://www.notion.so/Confirm-if-embedding-should-be-scaled-up-55f74b736e724bf0b40788873a9235ed?pvs=4
         # source *= self.input_size ** 0.5
 
-        source += self.positional_encoding[..., : source.size(1), :]
+        source += self.positional_encoding[..., : source.size(1), :].to(source.device)
 
         for layer in self.layers:
             source = layer(source)

@@ -84,17 +84,32 @@ class TransformerModule(L.LightningModule):
 
     def training_step(self, batch: Any, _: int) -> T.Tensor:
         """Perform a training step."""
-        batch = T.tensor(batch, dtype=T.long)
+        batch = T.tensor(batch, dtype=T.long, device=self.device)
 
         assert (
             batch.ndim == 2
-        ), f"input sentence should be a batch of vectors of word indices, not {batch.shape}"
+        ), f"input sentence should be a batch of vectors of word indices, \
+            not {batch.shape}"
 
         source = target = batch
 
         prediction = self.transformer(source, target)
 
-        loss = F.cross_entropy(prediction, target)
+        assert prediction.ndim == 3, "expected prediction to be a batch of sequences"
+        assert prediction.size(0) == target.size(
+            0
+        ), "expected prediction to have same batch size as target"
+        assert prediction.size(1) == target.size(
+            1
+        ), "expected prediction to have same sequence length as target"
+        assert (
+            prediction.size(2)
+            == self.hparams.word_embedding_vocabulary_size  # type: ignore
+        ), "expected prediction to be of vocabulary size"
+
+        loss = F.cross_entropy(prediction.view(-1, prediction.size(2)), target.view(-1))
+
+        assert loss.ndim == 0, "expected loss to be a scalar"
 
         self.log("train_loss", loss)
 

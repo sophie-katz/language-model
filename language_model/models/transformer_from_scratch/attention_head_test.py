@@ -15,6 +15,7 @@
 
 """Unit tests."""
 
+import pytest
 import torch as T
 
 from language_model.models.transformer_from_scratch.attention_head import AttentionHead
@@ -41,3 +42,47 @@ def test_attention_head_simple() -> None:
     result = attention_head(QKV(query=query, key=key, value=value))
 
     assert result.shape == (batch_size, input_sequence_length, qkv_feature_count)
+
+
+def test_attention_head_parameters_len() -> None:
+    """Test initialization and shapes for attention head in a simple case."""
+    input_feature_count = 3
+    qkv_feature_count = 6
+
+    attention_head = AttentionHead(
+        input_feature_count=input_feature_count,
+        qkv_feature_count=qkv_feature_count,
+    )
+
+    # 3 weights and 3 biases for the 3 linear layers
+    parameters = list(attention_head.parameters())
+    assert len(parameters) == 6
+    assert parameters[0].shape == (qkv_feature_count, input_feature_count)
+    assert parameters[1].shape == (qkv_feature_count,)
+    assert parameters[2].shape == (qkv_feature_count, input_feature_count)
+    assert parameters[3].shape == (qkv_feature_count,)
+    assert parameters[4].shape == (qkv_feature_count, input_feature_count)
+    assert parameters[5].shape == (qkv_feature_count,)
+
+
+@pytest.mark.skipif(not T.cuda.is_available(), reason="CUDA not available")
+def test_attention_head_cuda() -> None:
+    """CUDA."""
+    batch_size = 2
+    input_sequence_length = 4
+    output_sequence_length = 5
+    input_feature_count = 3
+    qkv_feature_count = 6
+
+    query = T.rand(batch_size, input_sequence_length, input_feature_count).cuda()
+    key = T.rand(batch_size, output_sequence_length, input_feature_count).cuda()
+    value = T.rand(batch_size, output_sequence_length, input_feature_count).cuda()
+
+    attention_head = AttentionHead(
+        input_feature_count=input_feature_count,
+        qkv_feature_count=qkv_feature_count,
+    ).cuda()
+
+    result = attention_head(QKV(query=query, key=key, value=value))
+
+    assert result.device.type == "cuda"

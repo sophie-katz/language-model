@@ -57,6 +57,7 @@ class DecoderBlock(TransformerBlock):
 
     def __post_init__(self) -> None:
         """Postinitialization for Pytorch module."""
+        # super().__init__()
         super().__post_init__()
 
         self.self_attention = Residual(

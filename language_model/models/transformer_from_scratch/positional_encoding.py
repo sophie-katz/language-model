@@ -25,9 +25,7 @@ import torch as T
 
 
 def get_positional_encoding(
-    sequence_length: int,
-    embedding_size: int,
-    base: float,
+    sequence_length: int, embedding_size: int, base: float
 ) -> T.Tensor:
     """Calculate positional encoding per Vaswani et. al. for use in transformers.
 

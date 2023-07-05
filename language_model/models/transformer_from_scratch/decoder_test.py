@@ -61,5 +61,5 @@ def test_decoder() -> None:
     assert result.shape == (
         batch_size,
         input_sequence_length,
-        word_embedding_feature_count,
+        word_embedding_vocabulary_size,
     )

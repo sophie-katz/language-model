@@ -54,6 +54,7 @@ class Decoder(TransformerPass):
         The linear layer to increase dimensionality.
     """
 
+    word_embedding_vocabulary_size: int
     decoder_block_head_count: int
     decoder_block_feed_forward_hidden_feature_count: int
     decoder_block_residual_dropout_rate: float
@@ -82,7 +83,7 @@ class Decoder(TransformerPass):
         # fmt: on
 
         self.linear = nn.Linear(
-            self.word_embedding_feature_count, self.word_embedding_feature_count
+            self.word_embedding_feature_count, self.word_embedding_vocabulary_size
         )
 
     def forward(self, target: T.Tensor, memory: T.Tensor) -> T.Tensor:
@@ -106,7 +107,7 @@ class Decoder(TransformerPass):
         # https://www.notion.so/Confirm-if-embedding-should-be-scaled-up-55f74b736e724bf0b40788873a9235ed?pvs=4
         # target *= self.input_size ** 0.5
 
-        target += self.positional_encoding[..., : target.size(1), :]
+        target += self.positional_encoding[..., : target.size(1), :].to(target.device)
 
         mask = T.tril(T.ones(get_sequence_length(target), get_sequence_length(target)))
 
@@ -118,7 +119,7 @@ class Decoder(TransformerPass):
         assert result.shape == (
             get_sequence_batch_size(target),
             get_sequence_length(target),
-            self.word_embedding_feature_count,
+            self.word_embedding_vocabulary_size,
         )
 
         result = T.softmax(result, dim=-1)
@@ -126,7 +127,7 @@ class Decoder(TransformerPass):
         assert result.shape == (
             get_sequence_batch_size(target),
             get_sequence_length(target),
-            self.word_embedding_feature_count,
+            self.word_embedding_vocabulary_size,
         )
 
         return result

@@ -15,12 +15,13 @@
 
 """Unit tests."""
 
+import pytest
 import torch as T
 
 from language_model.models.transformer_from_scratch.word_embedding import WordEmbedding
 
 
-def test_word_embedding() -> None:
+def test_word_embedding_simple() -> None:
     """Test the shape of word embeddings."""
     batch_size = 2
     vocabulary_size = 3
@@ -40,3 +41,26 @@ def test_word_embedding() -> None:
     word_embeddings = word_embedding_layer(word_indices)
 
     assert word_embeddings.shape == (batch_size, sentence_length, feature_count)
+
+
+@pytest.mark.skipif(not T.cuda.is_available(), reason="CUDA not available")
+def test_word_embedding_cuda() -> None:
+    """Test the shape of word embeddings."""
+    batch_size = 2
+    vocabulary_size = 3
+    sentence_length = 4
+    feature_count = 8
+
+    word_embedding_layer = WordEmbedding(vocabulary_size, feature_count).cuda()
+
+    word_indices = T.randint(
+        vocabulary_size,
+        (
+            batch_size,
+            sentence_length,
+        ),
+    ).cuda()
+
+    word_embeddings = word_embedding_layer(word_indices)
+
+    assert word_embeddings.device.type == "cuda"
