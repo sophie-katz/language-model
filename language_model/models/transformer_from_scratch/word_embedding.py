@@ -21,13 +21,10 @@ https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch 
 used to help with its implementation.
 """
 
-import dataclasses
-
 import torch as T
 from torch import nn
 
 
-@dataclasses.dataclass(unsafe_hash=True)
 class WordEmbedding(nn.Module):
     """A simple word embedding model.
 
@@ -47,14 +44,11 @@ class WordEmbedding(nn.Module):
         The embedding layer.
     """
 
-    vocabulary_size: int
-    feature_count: int
-
-    embedding: nn.Embedding = dataclasses.field(init=False)
-
-    def __post_init__(self) -> None:
-        """Postinitialization for Pytorch module."""
+    def __init__(self, vocabulary_size: int, feature_count: int) -> None:
         super().__init__()
+
+        self.vocabulary_size: int = vocabulary_size
+        self.feature_count: int = feature_count
 
         # We use Pytorch's built in embedding layer
         self.embedding = nn.Embedding(self.vocabulary_size, self.feature_count)

@@ -17,7 +17,12 @@
 
 # pylint: disable=magic-value-comparison
 
+import itertools
+
+import torch as T
+import torch.utils.data
 import torchtext.vocab
+from torchtext.datasets import WikiText2
 
 from language_model.data.utils.wiki2_transformer import get_wiki2_transformer_datapipe
 
@@ -26,7 +31,7 @@ def test_simple() -> None:
     """Test the simplest case."""
     _, datapipe = get_wiki2_transformer_datapipe(["a b .", "c d . ef ."])
 
-    assert [list(example) for example in datapipe] == [[[2, 3]], [[4, 5], [6]]]
+    assert list(datapipe) == [[2, 3], [4, 5], [6]]
 
 
 def test_with_vocabulary() -> None:
@@ -41,4 +46,38 @@ def test_with_vocabulary() -> None:
         ["a b .", "c d . ef ."], vocabulary=vocabulary
     )
 
-    assert [list(example) for example in datapipe] == [[[2, 3]], [[4, 0], [5]]]
+    assert list(datapipe) == [[2, 3], [4, 0], [5]]
+
+
+def test_integration_without_dataloader() -> None:
+    """Test the simplest case."""
+    train = WikiText2(root=".data", split="train")
+
+    vocabulary, train_datapipe = get_wiki2_transformer_datapipe(train)
+    vocabulary.set_default_index(vocabulary["<unk>"])
+
+    for batch_index, batch in enumerate(itertools.islice(train_datapipe, 5)):
+        assert isinstance(batch, T.Tensor)
+
+        if batch_index == 0:
+            assert batch.shape == (5,)
+        elif batch_index == 1:
+            assert batch.shape == (13,)
+
+
+def test_integration_with_dataloader() -> None:
+    """Test the simplest case."""
+    train = WikiText2(root=".data", split="train")
+
+    vocabulary, train_datapipe = get_wiki2_transformer_datapipe(train)
+    vocabulary.set_default_index(vocabulary["<unk>"])
+
+    train_dataloader = torch.utils.data.DataLoader(train_datapipe)  # type: ignore
+
+    for batch_index, batch in enumerate(itertools.islice(train_dataloader, 5)):
+        assert isinstance(batch, T.Tensor)
+
+        if batch_index == 0:
+            assert batch.shape == (1, 5)
+        elif batch_index == 1:
+            assert batch.shape == (1, 13)

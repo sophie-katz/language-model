@@ -19,12 +19,9 @@ This is heavily inspired by
 https://medium.com/the-dl/transformers-from-scratch-in-pytorch-8777e346ca51.
 """
 
-import dataclasses
-
 from torch import nn
 
 
-@dataclasses.dataclass(unsafe_hash=True)
 class FeedForward(nn.Sequential):
     """Feed forward network module for use in a transformer.
 
@@ -40,13 +37,14 @@ class FeedForward(nn.Sequential):
         The size of the hidden layer.
     """
 
-    input_feature_count: int
-    feed_forward_hidden_feature_count: int
-
-    def __post_init__(self) -> None:
-        """Postinitialization for Pytorch module."""
+    def __init__(
+        self, input_feature_count: int, feed_forward_hidden_feature_count: int
+    ) -> None:
         super().__init__(
-            nn.Linear(self.input_feature_count, self.feed_forward_hidden_feature_count),
+            nn.Linear(input_feature_count, feed_forward_hidden_feature_count),
             nn.ReLU(),
-            nn.Linear(self.feed_forward_hidden_feature_count, self.input_feature_count),
+            nn.Linear(feed_forward_hidden_feature_count, input_feature_count),
         )
+
+        self.input_feature_count = input_feature_count
+        self.feed_forward_hidden_feature_count = feed_forward_hidden_feature_count

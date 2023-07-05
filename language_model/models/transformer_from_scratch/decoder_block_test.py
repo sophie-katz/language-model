@@ -61,7 +61,7 @@ def test_decoder_block_parameters() -> None:
 
     # 2 weights and 2 biaes for the 2 linear layers
     parameters = list(decoder_block.parameters())
-    assert len(parameters) == 84
+    assert len(parameters) == 86
 
 
 @pytest.mark.skipif(not T.cuda.is_available(), reason="CUDA not available")

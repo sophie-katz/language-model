@@ -19,7 +19,6 @@ This is heavily inspired by
 https://medium.com/the-dl/transformers-from-scratch-in-pytorch-8777e346ca51.
 """
 
-import dataclasses
 from typing import Optional
 
 import torch as T
@@ -32,7 +31,6 @@ from language_model.models.transformer_from_scratch.shapes import (
 )
 
 
-@dataclasses.dataclass(unsafe_hash=True)
 class AttentionHead(nn.Module):
     """A single attention head for use in a transformer model.
 
@@ -57,16 +55,11 @@ class AttentionHead(nn.Module):
         The linear layer for the value tensor.
     """
 
-    input_feature_count: int
-    qkv_feature_count: int
-
-    query_linear: nn.Linear = dataclasses.field(init=False)
-    key_linear: nn.Linear = dataclasses.field(init=False)
-    value_linear: nn.Linear = dataclasses.field(init=False)
-
-    def __post_init__(self) -> None:
-        """Postinitialization for Pytorch module."""
+    def __init__(self, input_feature_count: int, qkv_feature_count: int) -> None:
         super().__init__()
+
+        self.input_feature_count = input_feature_count
+        self.qkv_feature_count = qkv_feature_count
 
         self.query_linear = nn.Linear(self.input_feature_count, self.qkv_feature_count)
         self.key_linear = nn.Linear(self.input_feature_count, self.qkv_feature_count)

@@ -22,7 +22,6 @@ https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch 
 used to help with its implementation.
 """
 
-import dataclasses
 from typing import Any, Generic, TypeVar, Union
 
 import torch as T
@@ -33,8 +32,7 @@ from language_model.models.transformer_from_scratch.qkv import QKV
 InternalLayer = TypeVar("InternalLayer", bound=nn.Module)
 
 
-@dataclasses.dataclass(unsafe_hash=True)
-class Residual(nn.Module, Generic[InternalLayer]):
+class Residual(nn.Module):
     """A residual module from a transformer.
 
     This is heavily inspired by
@@ -53,18 +51,25 @@ class Residual(nn.Module, Generic[InternalLayer]):
         The dropout rate for the residual layers.
     """
 
-    internal_layer: dataclasses.InitVar[InternalLayer]
-    input_feature_count: int
-    dropout_rate: float
-
-    def __post_init__(self, internal_layer: InternalLayer) -> None:
-        """Postinitialization for Pytorch module."""
+    def __init__(
+        self,
+        internal_layer: InternalLayer,
+        input_feature_count: int,
+        dropout_rate: float,
+    ) -> None:
         super().__init__()
 
-        # self.internal_layer = internal_layer
-        self.add_module("internal_layer", internal_layer)
+        self.input_feature_count = input_feature_count
+        self.dropout_rate = dropout_rate
+
+        self.internal_layer = internal_layer
         self.normalization = nn.LayerNorm(self.input_feature_count)
         self.dropout = nn.Dropout(self.dropout_rate)
+
+        assert (
+            len(list(self.parameters()))
+            == len(list(self.internal_layer.parameters())) + 2
+        )
 
     def forward(self, *tensors: Union[T.Tensor, QKV], **kwargs: Any) -> T.Tensor:
         """Forward function for network.

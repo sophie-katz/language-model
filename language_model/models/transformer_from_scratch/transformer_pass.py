@@ -25,7 +25,6 @@ was used to help with its implementation.
 """
 
 import abc
-import dataclasses
 
 import torch as T
 from torch import nn
@@ -36,8 +35,7 @@ from language_model.models.transformer_from_scratch.positional_encoding import (
 from language_model.models.transformer_from_scratch.word_embedding import WordEmbedding
 
 
-@dataclasses.dataclass(unsafe_hash=True)
-class TransformerPass(nn.Module, abc.ABC):
+class TransformerPass(abc.ABC, nn.Module):
     """A single pass of a transformer.
 
     Can be used as a base class for either an encoder or a decoder.
@@ -74,37 +72,41 @@ class TransformerPass(nn.Module, abc.ABC):
         The decoder block layers.
     """
 
-    layer_count: int
-    word_embedding_vocabulary_size: int
-    word_embedding_feature_count: int
-    positional_encoding_max_sequence_length: int
-    positional_encoding_base: float
-
-    word_embedding: WordEmbedding = dataclasses.field(init=False)
-    positional_encoding: T.Tensor = dataclasses.field(init=False)
-
-    def __post_init__(self) -> None:
-        """Postinitialization for Pytorch module."""
+    def __init__(
+        self,
+        layer_count: int,
+        word_embedding_vocabulary_size: int,
+        word_embedding_feature_count: int,
+        positional_encoding_max_sequence_length: int,
+        positional_encoding_base: float,
+    ) -> None:
         super().__init__()
 
-        self.word_embedding = WordEmbedding(
-            self.word_embedding_vocabulary_size, self.word_embedding_feature_count
+        self.layer_count = layer_count
+        self.word_embedding_vocabulary_size = word_embedding_vocabulary_size
+        self.word_embedding_feature_count = word_embedding_feature_count
+        self.positional_encoding_max_sequence_length = (
+            positional_encoding_max_sequence_length
         )
+        self.positional_encoding_base = positional_encoding_base
 
-        # self.layers = nn.ModuleList(
-        #     [
-        #         DecoderBlock(
-        #             input_size=self.input_size,
-        #             head_count=self.head_count,
-        #             feed_forward_hidden_size=self.feed_forward_hidden_size,
-        #             dropout_rate=self.dropout_rate,
-        #         )
-        #         for _ in range(self.layer_count)
-        #     ]
-        # )
+        self.word_embedding = WordEmbedding(
+            word_embedding_vocabulary_size, word_embedding_feature_count
+        )
 
         self.positional_encoding = get_positional_encoding(
-            self.positional_encoding_max_sequence_length,
-            self.word_embedding_feature_count,
-            self.positional_encoding_base,
+            positional_encoding_max_sequence_length,
+            word_embedding_feature_count,
+            positional_encoding_base,
         )
+
+    def forward(self, tensor: T.Tensor) -> T.Tensor:
+        tensor = self.word_embedding(tensor)
+
+        # TODO: Possibly scale up embedding -
+        # https://www.notion.so/Confirm-if-embedding-should-be-scaled-up-55f74b736e724bf0b40788873a9235ed?pvs=4
+        # tensor *= self.input_size ** 0.5
+
+        tensor += self.positional_encoding[..., : tensor.size(1), :].to(tensor.device)
+
+        return tensor

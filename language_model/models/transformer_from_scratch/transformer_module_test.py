@@ -55,6 +55,6 @@ def test_integration() -> None:
 
     transformer_module = TransformerModule(len(vocabulary))
 
-    trainer = L.Trainer(max_epochs=1)
+    trainer = L.Trainer(max_steps=10)
 
     trainer.fit(transformer_module, train_dataloader)

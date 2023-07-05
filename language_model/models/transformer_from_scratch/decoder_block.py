@@ -22,10 +22,10 @@ https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch
 was used to help with its implementation.
 """
 
-import dataclasses
 from typing import Optional
 
 import torch as T
+from torch import nn
 
 from language_model.models.transformer_from_scratch.multi_head_attention import (
     MultiHeadAttention,
@@ -37,8 +37,7 @@ from language_model.models.transformer_from_scratch.transformer_block import (
 )
 
 
-@dataclasses.dataclass(unsafe_hash=True)
-class DecoderBlock(TransformerBlock):
+class DecoderBlock(nn.Module):
     """The decoder block from a transformer.
 
     This is heavily inspired by
@@ -53,22 +52,42 @@ class DecoderBlock(TransformerBlock):
         The self attention layer.
     """
 
-    self_attention: Residual[MultiHeadAttention] = dataclasses.field(init=False)
+    def __init__(
+        self,
+        input_feature_count: int,
+        head_count: int,
+        feed_forward_hidden_feature_count: int,
+        residual_dropout_rate: float,
+    ) -> None:
+        super().__init__()
 
-    def __post_init__(self) -> None:
-        """Postinitialization for Pytorch module."""
-        # super().__init__()
-        super().__post_init__()
+        self.input_feature_count = input_feature_count
+        self.head_count = head_count
+        self.feed_forward_hidden_feature_count = feed_forward_hidden_feature_count
+        self.residual_dropout_rate = residual_dropout_rate
+
+        self.transformer_block = TransformerBlock(
+            input_feature_count=input_feature_count,
+            head_count=head_count,
+            feed_forward_hidden_feature_count=feed_forward_hidden_feature_count,
+            residual_dropout_rate=residual_dropout_rate,
+        )
+
+        assert len(list(self.transformer_block.parameters())) == 46
 
         self.self_attention = Residual(
             internal_layer=MultiHeadAttention(
-                head_count=self.head_count,
-                input_feature_count=self.input_feature_count,
-                qkv_feature_count=self.qkv_feature_count,
+                head_count=head_count,
+                input_feature_count=input_feature_count,
+                qkv_feature_count=self.transformer_block.qkv_feature_count,
             ),
-            input_feature_count=self.input_feature_count,
-            dropout_rate=self.residual_dropout_rate,
+            input_feature_count=input_feature_count,
+            dropout_rate=residual_dropout_rate,
         )
+
+        assert len(list(self.self_attention.parameters())) == 40
+
+        assert len(list(self.parameters())) == 86
 
     def forward(
         self, target: T.Tensor, memory: T.Tensor, mask: Optional[T.Tensor] = None
@@ -88,6 +107,4 @@ class DecoderBlock(TransformerBlock):
             A single tensor. TODO: Find the size of this.
         """
         result: T.Tensor = self.self_attention(QKV(target, target, target), mask=mask)
-        result = self.attention(QKV(result, memory, memory))
-        result = self.feed_forward(result)
-        return result
+        return self.transformer_block(QKV(result, memory, memory))

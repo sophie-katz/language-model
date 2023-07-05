@@ -22,18 +22,16 @@ https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch
 was used to help with its implementation.
 """
 
-import dataclasses
-
 import torch as T
+from torch import nn
 
-from language_model.models.transformer_from_scratch.qkv import QKV
 from language_model.models.transformer_from_scratch.transformer_block import (
     TransformerBlock,
 )
+from language_model.models.transformer_from_scratch.qkv import QKV
 
 
-@dataclasses.dataclass(unsafe_hash=True)
-class EncoderBlock(TransformerBlock):
+class EncoderBlock(nn.Module):
     """The encoder block from a transformer.
 
     This is heavily inspired by
@@ -42,6 +40,27 @@ class EncoderBlock(TransformerBlock):
     https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch
     was used to help with its implementation.
     """
+
+    def __init__(
+        self,
+        input_feature_count: int,
+        head_count: int,
+        feed_forward_hidden_feature_count: int,
+        residual_dropout_rate: float,
+    ) -> None:
+        super().__init__()
+
+        self.input_feature_count = input_feature_count
+        self.head_count = head_count
+        self.feed_forward_hidden_feature_count = feed_forward_hidden_feature_count
+        self.residual_dropout_rate = residual_dropout_rate
+
+        self.transformer_block = TransformerBlock(
+            input_feature_count=input_feature_count,
+            head_count=head_count,
+            feed_forward_hidden_feature_count=feed_forward_hidden_feature_count,
+            residual_dropout_rate=residual_dropout_rate,
+        )
 
     def forward(self, source: T.Tensor) -> T.Tensor:
         """Forward function for network.
@@ -56,6 +75,4 @@ class EncoderBlock(TransformerBlock):
         T.Tensor
             A single tensor. TODO: Find the size of this.
         """
-        result: T.Tensor = self.attention(QKV(source, source, source))
-        result = self.feed_forward(result)
-        return result
+        return self.transformer_block(QKV(source, source, source))

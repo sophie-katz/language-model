@@ -22,7 +22,6 @@ https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch
 was used to help with its implementation.
 """
 
-import dataclasses
 from typing import Optional
 
 import torch as T
@@ -32,7 +31,6 @@ from language_model.models.transformer_from_scratch.attention_head import Attent
 from language_model.models.transformer_from_scratch.qkv import QKV
 
 
-@dataclasses.dataclass(unsafe_hash=True)
 class MultiHeadAttention(nn.Module):
     """A multi-head attention module from a transformer.
 
@@ -60,16 +58,14 @@ class MultiHeadAttention(nn.Module):
         The linear layer for the output tensor.
     """
 
-    head_count: int
-    input_feature_count: int
-    qkv_feature_count: int
-
-    heads: nn.ModuleList = dataclasses.field(init=False)
-    linear: nn.Linear = dataclasses.field(init=False)
-
-    def __post_init__(self) -> None:
-        """Postinitialization for Pytorch module."""
+    def __init__(
+        self, head_count: int, input_feature_count: int, qkv_feature_count: int
+    ) -> None:
         super().__init__()
+
+        self.head_count = head_count
+        self.input_feature_count = input_feature_count
+        self.qkv_feature_count = qkv_feature_count
 
         # TODO: Should each head have a separate key, query, and value matrix? -
         # https://www.notion.so/Confirm-if-each-head-should-have-separate-trainable-weights-a3a189025e544dd58904ca23007a902d?pvs=4

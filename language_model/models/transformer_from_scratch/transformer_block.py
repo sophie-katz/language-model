@@ -27,10 +27,10 @@ was used to help with its implementation.
 
 # pylint: disable=abstract-method
 
-import dataclasses
-
+import torch as T
 from torch import nn
 
+from language_model.models.transformer_from_scratch.qkv import QKV
 from language_model.models.transformer_from_scratch.feed_forward import FeedForward
 from language_model.models.transformer_from_scratch.multi_head_attention import (
     MultiHeadAttention,
@@ -38,7 +38,6 @@ from language_model.models.transformer_from_scratch.multi_head_attention import 
 from language_model.models.transformer_from_scratch.residual import Residual
 
 
-@dataclasses.dataclass(unsafe_hash=True)
 class TransformerBlock(nn.Module):
     """A block from a transformer.
 
@@ -73,26 +72,21 @@ class TransformerBlock(nn.Module):
         The feed forward layer.
     """
 
-    input_feature_count: int
-    head_count: int
-    feed_forward_hidden_feature_count: int
-    residual_dropout_rate: float
-
-    qkv_feature_count: int = dataclasses.field(init=False)
-
-    attention: Residual[MultiHeadAttention] = dataclasses.field(init=False)
-    feed_forward: Residual[FeedForward] = dataclasses.field(init=False)
-
-    def __post_init__(self) -> None:
-        """Postinitialization for Pytorch module."""
+    def __init__(
+        self,
+        input_feature_count: int,
+        head_count: int,
+        feed_forward_hidden_feature_count: int,
+        residual_dropout_rate: float,
+    ) -> None:
         # pylint: disable=unidiomatic-typecheck
 
         super().__init__()
 
-        if type(self) == TransformerBlock:
-            raise TypeError(
-                "TransformerBlock is an abstract class and cannot be instantiated."
-            )
+        self.input_feature_count = input_feature_count
+        self.head_count = head_count
+        self.feed_forward_hidden_feature_count = feed_forward_hidden_feature_count
+        self.residual_dropout_rate = residual_dropout_rate
 
         self.qkv_feature_count = max(self.input_feature_count // self.head_count, 1)
 
@@ -106,13 +100,26 @@ class TransformerBlock(nn.Module):
             dropout_rate=self.residual_dropout_rate,
         )
 
+        assert len(list(self.attention.parameters())) == 40
+
         feed_forward_internal = FeedForward(
             input_feature_count=self.input_feature_count,
             feed_forward_hidden_feature_count=self.feed_forward_hidden_feature_count,
         )
+
+        assert len(list(feed_forward_internal.parameters())) == 4
 
         self.feed_forward = Residual(
             internal_layer=feed_forward_internal,
             input_feature_count=self.input_feature_count,
             dropout_rate=self.residual_dropout_rate,
         )
+
+        assert len(list(self.feed_forward.parameters())) == 6
+
+        assert len(list(self.parameters())) == 46
+
+    def forward(self, qkv: QKV) -> T.Tensor:
+        result: T.Tensor = self.attention(qkv)
+        result = self.feed_forward(result)
+        return result

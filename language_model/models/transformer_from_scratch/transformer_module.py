@@ -84,7 +84,7 @@ class TransformerModule(L.LightningModule):
 
     def training_step(self, batch: Any, _: int) -> T.Tensor:
         """Perform a training step."""
-        batch = T.tensor(batch, dtype=T.long, device=self.device)
+        assert isinstance(batch, T.Tensor)
 
         assert (
             batch.ndim == 2

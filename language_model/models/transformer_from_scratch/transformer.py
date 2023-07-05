@@ -22,8 +22,6 @@ https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch 
 used to help with its implementation.
 """
 
-import dataclasses
-
 import torch as T
 from torch import nn
 
@@ -31,7 +29,6 @@ from language_model.models.transformer_from_scratch.decoder import Decoder
 from language_model.models.transformer_from_scratch.encoder import Encoder
 
 
-@dataclasses.dataclass(unsafe_hash=True)
 class Transformer(nn.Module):
     """Transformer model.
 
@@ -69,25 +66,41 @@ class Transformer(nn.Module):
         The decoder part of the model.
     """
 
-    encoder_layer_count: int
-    decoder_layer_count: int
-    word_embedding_vocabulary_size: int
-    word_embedding_feature_count: int
-    positional_encoding_max_sequence_length: int
-    positional_encoding_base: float
-    encoder_block_head_count: int
-    encoder_block_feed_forward_hidden_feature_count: int
-    encoder_block_residual_dropout_rate: float
-    decoder_block_head_count: int
-    decoder_block_feed_forward_hidden_feature_count: int
-    decoder_block_residual_dropout_rate: float
-
-    encoder: Encoder = dataclasses.field(init=False)
-    decoder: Decoder = dataclasses.field(init=False)
-
-    def __post_init__(self) -> None:
-        """Postinitialization for Pytorch module."""
+    def __init__(
+        self,
+        encoder_layer_count: int,
+        decoder_layer_count: int,
+        word_embedding_vocabulary_size: int,
+        word_embedding_feature_count: int,
+        positional_encoding_max_sequence_length: int,
+        positional_encoding_base: float,
+        encoder_block_head_count: int,
+        encoder_block_feed_forward_hidden_feature_count: int,
+        encoder_block_residual_dropout_rate: float,
+        decoder_block_head_count: int,
+        decoder_block_feed_forward_hidden_feature_count: int,
+        decoder_block_residual_dropout_rate: float,
+    ) -> None:
         super().__init__()
+
+        self.encoder_layer_count = encoder_layer_count
+        self.decoder_layer_count = decoder_layer_count
+        self.word_embedding_vocabulary_size = word_embedding_vocabulary_size
+        self.word_embedding_feature_count = word_embedding_feature_count
+        self.positional_encoding_max_sequence_length = (
+            positional_encoding_max_sequence_length
+        )
+        self.positional_encoding_base = positional_encoding_base
+        self.encoder_block_head_count = encoder_block_head_count
+        self.encoder_block_feed_forward_hidden_feature_count = (
+            encoder_block_feed_forward_hidden_feature_count
+        )
+        self.encoder_block_residual_dropout_rate = encoder_block_residual_dropout_rate
+        self.decoder_block_head_count = decoder_block_head_count
+        self.decoder_block_feed_forward_hidden_feature_count = (
+            decoder_block_feed_forward_hidden_feature_count
+        )
+        self.decoder_block_residual_dropout_rate = decoder_block_residual_dropout_rate
 
         # fmt: off
         self.encoder = Encoder(

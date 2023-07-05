@@ -22,8 +22,6 @@ https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch
 was used to help with its implementation.
 """
 
-import dataclasses
-
 import torch as T
 from torch import nn
 
@@ -33,8 +31,7 @@ from language_model.models.transformer_from_scratch.transformer_pass import (
 )
 
 
-@dataclasses.dataclass(unsafe_hash=True)
-class Encoder(TransformerPass):
+class Encoder(nn.Module):
     """The encoder from a transformer.
 
     This is heavily inspired by
@@ -44,28 +41,52 @@ class Encoder(TransformerPass):
     was used to help with its implementation.
     """
 
-    encoder_block_head_count: int
-    encoder_block_feed_forward_hidden_feature_count: int
-    encoder_block_residual_dropout_rate: float
+    def __init__(
+        self,
+        layer_count: int,
+        word_embedding_vocabulary_size: int,
+        word_embedding_feature_count: int,
+        positional_encoding_max_sequence_length: int,
+        positional_encoding_base: float,
+        encoder_block_head_count: int,
+        encoder_block_feed_forward_hidden_feature_count: int,
+        encoder_block_residual_dropout_rate: float,
+    ) -> None:
+        super().__init__()
 
-    layers: nn.ModuleList = dataclasses.field(init=False)
+        self.layer_count = layer_count
+        self.word_embedding_vocabulary_size = word_embedding_vocabulary_size
+        self.word_embedding_feature_count = word_embedding_feature_count
+        self.positional_encoding_max_sequence_length = (
+            positional_encoding_max_sequence_length
+        )
+        self.positional_encoding_base = positional_encoding_base
+        self.encoder_block_head_count = encoder_block_head_count
+        self.encoder_block_feed_forward_hidden_feature_count = (
+            encoder_block_feed_forward_hidden_feature_count
+        )
+        self.encoder_block_residual_dropout_rate = encoder_block_residual_dropout_rate
 
-    def __post_init__(self) -> None:
-        """Postinitialization for Pytorch module."""
-        super().__post_init__()
+        self.transformer_pass = TransformerPass(
+            layer_count=layer_count,
+            word_embedding_vocabulary_size=word_embedding_vocabulary_size,
+            word_embedding_feature_count=word_embedding_feature_count,
+            positional_encoding_max_sequence_length=positional_encoding_max_sequence_length,
+            positional_encoding_base=positional_encoding_base,
+        )
 
         # fmt: off
         self.layers = nn.ModuleList(
             [
                 EncoderBlock(
-                    input_feature_count=self.word_embedding_feature_count,
-                    head_count=self.encoder_block_head_count,
+                    input_feature_count=word_embedding_feature_count,
+                    head_count=encoder_block_head_count,
                     feed_forward_hidden_feature_count=(
-                        self.encoder_block_feed_forward_hidden_feature_count
+                        encoder_block_feed_forward_hidden_feature_count
                     ),
-                    residual_dropout_rate=self.encoder_block_residual_dropout_rate,
+                    residual_dropout_rate=encoder_block_residual_dropout_rate,
                 )
-                for _ in range(self.layer_count)
+                for _ in range(layer_count)
             ]
         )
         # fmt: on
@@ -83,13 +104,15 @@ class Encoder(TransformerPass):
         T.Tensor
             A single tensor. TODO: Find the size of this.
         """
-        source = self.word_embedding(source)
+        # source = self.word_embedding(source)
 
-        # TODO: Possibly scale up embedding -
-        # https://www.notion.so/Confirm-if-embedding-should-be-scaled-up-55f74b736e724bf0b40788873a9235ed?pvs=4
-        # source *= self.input_size ** 0.5
+        # # TODO: Possibly scale up embedding -
+        # # https://www.notion.so/Confirm-if-embedding-should-be-scaled-up-55f74b736e724bf0b40788873a9235ed?pvs=4
+        # # source *= self.input_size ** 0.5
 
-        source += self.positional_encoding[..., : source.size(1), :].to(source.device)
+        # source += self.positional_encoding[..., : source.size(1), :].to(source.device)
+
+        source = self.transformer_pass(source)
 
         for layer in self.layers:
             source = layer(source)

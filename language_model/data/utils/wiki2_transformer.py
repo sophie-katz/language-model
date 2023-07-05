@@ -18,7 +18,9 @@
 from collections.abc import Iterable, Iterator
 from typing import Optional
 
+import torch as T
 import torchtext.vocab
+import torchdata.datapipes as dp
 
 from language_model.data.data_pipelines.apply_vocabulary_to_tokens import (
     ApplyVocabularyToTokens,
@@ -52,6 +54,14 @@ def get_wiki2_transformer_datapipe(
     else:
         datapipe_indices = ApplyVocabularyToTokens(datapipe_tokens_filtered, vocabulary)
 
-    datapipe_sentences = SplitSentencesByIndex(datapipe_indices, vocabulary["."])
+    datapipe_sentences_for_examples = SplitSentencesByIndex(
+        datapipe_indices, vocabulary["."]
+    )
 
-    return vocabulary, datapipe_sentences
+    datapipe_sentences = dp.iter.FlatMapper(datapipe_sentences_for_examples)
+
+    datapipe_sentence_tensors = dp.iter.Mapper(
+        datapipe_sentences, lambda x: T.tensor(x, dtype=T.long)
+    )
+
+    return vocabulary, datapipe_sentence_tensors
