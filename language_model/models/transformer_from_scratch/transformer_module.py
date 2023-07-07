@@ -17,6 +17,8 @@
 
 from typing import Any
 
+import comet_ml
+
 import lightning as L
 import torch.optim
 import torch as T
@@ -32,6 +34,7 @@ class TransformerModule(L.LightningModule):
 
     def __init__(
         self,
+        comet_experiment: comet_ml.Experiment,
         word_embedding_vocabulary_size: int,
         encoder_layer_count: int = 6,
         decoder_layer_count: int = 6,
@@ -51,6 +54,8 @@ class TransformerModule(L.LightningModule):
         Accepts hyperparameters as arguments.
         """
         super().__init__()
+
+        self.comet_experiment = comet_experiment
 
         self.hparams.word_embedding_vocabulary_size = (  # type: ignore
             word_embedding_vocabulary_size
@@ -93,6 +98,39 @@ class TransformerModule(L.LightningModule):
 
         source = target = batch
 
+        self.comet_experiment.log_histogram_3d(
+            self.transformer.encoder.transformer_pass.word_embedding.embedding.weight.detach()
+            .cpu()
+            .numpy(),
+            name="encoder/word_embedding/weight",
+            step=self.global_step,
+        )
+
+        if (
+            self.transformer.encoder.transformer_pass.word_embedding.embedding.weight.grad
+            is not None
+        ):
+            self.comet_experiment.log_histogram_3d(
+                self.transformer.encoder.transformer_pass.word_embedding.embedding.weight.grad.detach()
+                .cpu()
+                .numpy(),
+                name="encoder/word_embedding/weight/grad",
+                step=self.global_step,
+            )
+
+        self.comet_experiment.log_histogram_3d(
+            self.transformer.decoder.linear.weight.detach().cpu().numpy(),
+            name="decoder/linear/weight",
+            step=self.global_step,
+        )
+
+        if self.transformer.decoder.linear.weight.grad is not None:
+            self.comet_experiment.log_histogram_3d(
+                self.transformer.decoder.linear.weight.grad.detach().cpu().numpy(),
+                name="decoder/linear/weight/grad",
+                step=self.global_step,
+            )
+
         prediction = self.transformer(source, target)
 
         assert prediction.ndim == 3, "expected prediction to be a batch of sequences"
@@ -107,11 +145,17 @@ class TransformerModule(L.LightningModule):
             == self.hparams.word_embedding_vocabulary_size  # type: ignore
         ), "expected prediction to be of vocabulary size"
 
+        self.comet_experiment.log_histogram_3d(
+            prediction.squeeze().argmax(dim=-1).detach().cpu().numpy(),
+            name="train/prediction",
+            step=self.global_step,
+        )
+
         loss = F.cross_entropy(prediction.view(-1, prediction.size(2)), target.view(-1))
 
         assert loss.ndim == 0, "expected loss to be a scalar"
 
-        self.log("train_loss", loss)
+        self.comet_experiment.log_metric("train/loss", loss, step=self.global_step)
 
         return loss
 
