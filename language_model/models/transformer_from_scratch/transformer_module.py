@@ -15,10 +15,9 @@
 
 """Lightning module for transformer."""
 
-from typing import Any
+from typing import Any, Optional
 
 import comet_ml
-
 import lightning as L
 import torch.optim
 import torch as T
@@ -34,28 +33,26 @@ class TransformerModule(L.LightningModule):
 
     def __init__(
         self,
-        comet_experiment: comet_ml.Experiment,
         word_embedding_vocabulary_size: int,
-        encoder_layer_count: int = 6,
-        decoder_layer_count: int = 6,
+        encoder_layer_count: int = 1,
+        decoder_layer_count: int = 1,
         word_embedding_feature_count: int = 512,
         positional_encoding_max_sequence_length: int = 4096,
         positional_encoding_base: float = 1e4,
-        encoder_block_head_count: int = 6,
-        encoder_block_feed_forward_hidden_feature_count: int = 4096,
+        encoder_block_head_count: int = 3,
+        encoder_block_feed_forward_hidden_feature_count: int = 1024,
         encoder_block_residual_dropout_rate: float = 0.1,
-        decoder_block_head_count: int = 6,
-        decoder_block_feed_forward_hidden_feature_count: int = 4096,
+        decoder_block_head_count: int = 3,
+        decoder_block_feed_forward_hidden_feature_count: int = 1024,
         decoder_block_residual_dropout_rate: float = 0.1,
-        learning_rate: float = 1e-3,
+        learning_rate: float = 1e-4,
+        comet_experiment: Optional[comet_ml.Experiment] = None,
     ) -> None:
         """Initialize the module.
 
         Accepts hyperparameters as arguments.
         """
         super().__init__()
-
-        self.comet_experiment = comet_experiment
 
         self.hparams.word_embedding_vocabulary_size = (  # type: ignore
             word_embedding_vocabulary_size
@@ -85,6 +82,11 @@ class TransformerModule(L.LightningModule):
         )
         self.hparams.learning_rate = learning_rate  # type: ignore
 
+        self.comet_experiment = comet_experiment
+
+        if self.comet_experiment is not None:
+            self.comet_experiment.log_parameters(self.hparams)
+
         self.transformer = self._create_transformer()
 
     def training_step(self, batch: Any, _: int) -> T.Tensor:
@@ -98,38 +100,46 @@ class TransformerModule(L.LightningModule):
 
         source = target = batch
 
-        self.comet_experiment.log_histogram_3d(
-            self.transformer.encoder.transformer_pass.word_embedding.embedding.weight.detach()
-            .cpu()
-            .numpy(),
-            name="encoder/word_embedding/weight",
-            step=self.global_step,
-        )
+        # if self.comet_experiment is not None and (self.global_step % 50) == 0:
+        #     self.comet_experiment.log_histogram_3d(
+        #         self.transformer.encoder.transformer_pass.word_embedding.embedding.weight.detach()
+        #         .cpu()
+        #         .numpy(),
+        #         name="encoder/word_embedding/weight",
+        #         step=self.global_step,
+        #     )
 
-        if (
-            self.transformer.encoder.transformer_pass.word_embedding.embedding.weight.grad
-            is not None
-        ):
-            self.comet_experiment.log_histogram_3d(
-                self.transformer.encoder.transformer_pass.word_embedding.embedding.weight.grad.detach()
-                .cpu()
-                .numpy(),
-                name="encoder/word_embedding/weight/grad",
-                step=self.global_step,
-            )
+        # if (
+        #     self.comet_experiment is not None
+        #     and (self.global_step % 50) == 0
+        #     and self.transformer.encoder.transformer_pass.word_embedding.embedding.weight.grad
+        #     is not None
+        # ):
+        #     self.comet_experiment.log_histogram_3d(
+        #         self.transformer.encoder.transformer_pass.word_embedding.embedding.weight.grad.detach()
+        #         .cpu()
+        #         .numpy(),
+        #         name="encoder/word_embedding/weight/grad",
+        #         step=self.global_step,
+        #     )
 
-        self.comet_experiment.log_histogram_3d(
-            self.transformer.decoder.linear.weight.detach().cpu().numpy(),
-            name="decoder/linear/weight",
-            step=self.global_step,
-        )
+        # if self.comet_experiment is not None and (self.global_step % 50) == 0:
+        #     self.comet_experiment.log_histogram_3d(
+        #         self.transformer.decoder.linear.weight.detach().cpu().numpy(),
+        #         name="decoder/linear/weight",
+        #         step=self.global_step,
+        #     )
 
-        if self.transformer.decoder.linear.weight.grad is not None:
-            self.comet_experiment.log_histogram_3d(
-                self.transformer.decoder.linear.weight.grad.detach().cpu().numpy(),
-                name="decoder/linear/weight/grad",
-                step=self.global_step,
-            )
+        # if (
+        #     self.comet_experiment is not None
+        #     and (self.global_step % 50) == 0
+        #     and self.transformer.decoder.linear.weight.grad is not None
+        # ):
+        #     self.comet_experiment.log_histogram_3d(
+        #         self.transformer.decoder.linear.weight.grad.detach().cpu().numpy(),
+        #         name="decoder/linear/weight/grad",
+        #         step=self.global_step,
+        #     )
 
         prediction = self.transformer(source, target)
 
@@ -145,24 +155,29 @@ class TransformerModule(L.LightningModule):
             == self.hparams.word_embedding_vocabulary_size  # type: ignore
         ), "expected prediction to be of vocabulary size"
 
-        self.comet_experiment.log_histogram_3d(
-            prediction.squeeze().argmax(dim=-1).detach().cpu().numpy(),
-            name="train/prediction",
-            step=self.global_step,
-        )
+        if self.comet_experiment is not None and (self.global_step % 50) == 0:
+            self.comet_experiment.log_histogram_3d(
+                prediction.squeeze().argmax(dim=-1).detach().cpu().numpy(),
+                name="train/prediction",
+                step=self.global_step,
+            )
 
         loss = F.cross_entropy(prediction.view(-1, prediction.size(2)), target.view(-1))
 
         assert loss.ndim == 0, "expected loss to be a scalar"
 
-        self.comet_experiment.log_metric("train/loss", loss, step=self.global_step)
+        if self.comet_experiment is not None:
+            self.comet_experiment.log_metric("train/loss", loss, step=self.global_step)
 
         return loss
 
     def configure_optimizers(self) -> Any:
         """Configure the optimizer."""
         return torch.optim.Adam(
-            self.parameters(), lr=self.hparams.learning_rate  # type: ignore
+            self.parameters(),
+            lr=self.hparams.learning_rate,  # type: ignore
+            betas=(0.9, 0.98),
+            eps=1e-9,
         )
 
     def _create_transformer(self) -> Transformer:
