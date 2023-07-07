@@ -23,6 +23,7 @@ __pycache__
 # Training data
 lightning_logs
 logs
+checkpoints
 .data
 
 # Secrets

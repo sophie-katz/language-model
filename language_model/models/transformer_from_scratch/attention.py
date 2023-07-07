@@ -76,7 +76,7 @@ def attention(qkv: QKV, mask: Optional[T.Tensor] = None) -> T.Tensor:
 
         score = score.masked_fill(mask == 0, MASK_FILL_VALUE)
 
-    weight = F.softmax(score / qkv.feature_count**0.5)
+    weight = F.softmax(score / qkv.feature_count**0.5, dim=-1)
 
     assert (
         weight.shape == score.shape

@@ -81,3 +81,15 @@ def test_integration_with_dataloader() -> None:
             assert batch.shape == (1, 5)
         elif batch_index == 1:
             assert batch.shape == (1, 13)
+
+
+def test_performance_with_dataloader() -> None:
+    """Test the simplest case."""
+    train = WikiText2(root=".data", split="train")
+
+    vocabulary, train_datapipe = get_wiki2_transformer_datapipe(train)
+    vocabulary.set_default_index(vocabulary["<unk>"])
+
+    train_dataloader = torch.utils.data.DataLoader(train_datapipe)  # type: ignore
+
+    assert len(list(itertools.islice(train_dataloader, 100))) == 100

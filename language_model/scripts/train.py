@@ -13,8 +13,10 @@
 # You should have received a copy of the GNU General Public License along with Language
 # Model. If not, see <https://www.gnu.org/licenses/>.
 
-import comet_ml
+import warnings
+from typing import Optional
 
+import comet_ml
 import lightning as L
 import torch.utils.data
 from torchtext.datasets import WikiText2
@@ -24,18 +26,29 @@ from language_model.data.utils.wiki2_transformer import get_wiki2_transformer_da
 from language_model.models.transformer_from_scratch.transformer_module import (
     TransformerModule,
 )
+from language_model.lightning_checker import Checker
 
 if __name__ == "__main__":
+    # Disable warnings
+    warnings.filterwarnings("ignore", ".*does not have many workers.*")
+    warnings.filterwarnings("ignore", ".*Some child DataPipes are not exhausted.*")
+    warnings.filterwarnings(
+        "ignore", ".*are turning off the .* dataloader shuffling for you.*"
+    )
+
     # Load configuration
     configuration = Configuration()
     configuration.load_from_env()
 
     # Initialize Comet experiment
-    comet_experiment = comet_ml.Experiment(
-        api_key=configuration.comet_api_key,
-        project_name=configuration.comet_project,
-        workspace=configuration.comet_workspace,
-    )
+    comet_experiment: Optional[comet_ml.Experiment] = None
+
+    if configuration.comet_enabled:
+        comet_experiment = comet_ml.Experiment(
+            api_key=configuration.comet_api_key,
+            project_name=configuration.comet_project,
+            workspace=configuration.comet_workspace,
+        )
 
     # Create data loaders
     train, valid, test = WikiText2(root=".data", split=("train", "valid", "test"))
@@ -46,12 +59,34 @@ if __name__ == "__main__":
     _, valid_datapipe = get_wiki2_transformer_datapipe(valid, vocabulary=vocabulary)
     _, test_datapipe = get_wiki2_transformer_datapipe(test, vocabulary=vocabulary)
 
-    train_dataloader = torch.utils.data.DataLoader(train_datapipe)  # type: ignore
+    train_dataloader = torch.utils.data.DataLoader(
+        train_datapipe, shuffle=False, num_workers=0  # type: ignore
+    )
 
     # Create Lightning components
-    transformer_module = TransformerModule(comet_experiment, len(vocabulary))
+    transformer_module = TransformerModule(
+        word_embedding_vocabulary_size=len(vocabulary),
+        comet_experiment=comet_experiment,
+    )
 
-    trainer = L.Trainer(max_epochs=2, detect_anomaly=True, overfit_batches=10)
+    profiler = L.pytorch.profilers.AdvancedProfiler(dirpath=".", filename="perf_logs")
+
+    MAX_EPOCHS = 200
+    OVERFIT_BATCHES = 1000
+
+    if comet_experiment is not None:
+        comet_experiment.log_parameter("max_epochs", MAX_EPOCHS)
+        comet_experiment.log_parameter("overfit_batches", OVERFIT_BATCHES)
+
+    trainer = L.Trainer(
+        max_epochs=MAX_EPOCHS,
+        # detect_anomaly=True,
+        overfit_batches=OVERFIT_BATCHES,
+        logger=False,
+        callbacks=[Checker()],
+        # profiler=profiler,
+        enable_checkpointing=False,
+    )
 
     # Train
     trainer.fit(transformer_module, train_dataloader)

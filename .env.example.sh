@@ -18,6 +18,8 @@
 # 1. Copy this file to .env in the same directory
 # 2. Fill in any values that are missing below
 
+# Comet integration
+COMET_ENABLED="true"
 COMET_API_KEY= # TODO: Must be set
 COMET_PROJECT_NAME= # TODO: Must be set
 COMET_WORKSPACE= # TODO: Must be set

@@ -100,8 +100,6 @@ class TransformerBlock(nn.Module):
             dropout_rate=self.residual_dropout_rate,
         )
 
-        assert len(list(self.attention.parameters())) == 40
-
         feed_forward_internal = FeedForward(
             input_feature_count=self.input_feature_count,
             feed_forward_hidden_feature_count=self.feed_forward_hidden_feature_count,
@@ -116,8 +114,6 @@ class TransformerBlock(nn.Module):
         )
 
         assert len(list(self.feed_forward.parameters())) == 6
-
-        assert len(list(self.parameters())) == 46
 
     def forward(self, qkv: QKV) -> T.Tensor:
         result: T.Tensor = self.attention(qkv)

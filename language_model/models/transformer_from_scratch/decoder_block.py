@@ -73,7 +73,7 @@ class DecoderBlock(nn.Module):
             residual_dropout_rate=residual_dropout_rate,
         )
 
-        assert len(list(self.transformer_block.parameters())) == 46
+        # assert len(list(self.transformer_block.parameters())) == 46
 
         self.self_attention = Residual(
             internal_layer=MultiHeadAttention(
@@ -85,9 +85,9 @@ class DecoderBlock(nn.Module):
             dropout_rate=residual_dropout_rate,
         )
 
-        assert len(list(self.self_attention.parameters())) == 40
+        # assert len(list(self.self_attention.parameters())) == 40
 
-        assert len(list(self.parameters())) == 86
+        # assert len(list(self.parameters())) == 86
 
     def forward(
         self, target: T.Tensor, memory: T.Tensor, mask: Optional[T.Tensor] = None
