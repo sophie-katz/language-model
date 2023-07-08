@@ -28,7 +28,7 @@ def test_residual_simple() -> None:
     input_feature_count = 4
     dropout_rate = 0.1
 
-    residual: Residual[nn.Linear] = Residual(
+    residual: Residual = Residual(
         internal_layer=nn.Linear(input_feature_count, input_feature_count),
         input_feature_count=input_feature_count,
         dropout_rate=dropout_rate,
@@ -47,7 +47,7 @@ def test_residual_parameters() -> None:
     output_feature_count = 3
     dropout_rate = 0.1
 
-    residual: Residual[nn.Linear] = Residual(
+    residual: Residual = Residual(
         internal_layer=nn.Linear(input_feature_count, output_feature_count),
         input_feature_count=input_feature_count,
         dropout_rate=dropout_rate,
@@ -70,7 +70,7 @@ def test_residual_cuda() -> None:
     input_feature_count = 4
     dropout_rate = 0.1
 
-    residual: Residual[nn.Linear] = Residual(
+    residual: Residual = Residual(
         internal_layer=nn.Linear(input_feature_count, input_feature_count),
         input_feature_count=input_feature_count,
         dropout_rate=dropout_rate,
