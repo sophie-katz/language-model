@@ -38,7 +38,7 @@ from language_model.data.data_pipelines.split_sentences_by_index import (
 def get_wiki2_transformer_datapipe(
     strings: Iterable[str],
     vocabulary: Optional[torchtext.vocab.Vocab] = None,
-) -> tuple[torchtext.vocab.Vocab, Iterator[list[list[int]]]]:
+) -> tuple[torchtext.vocab.Vocab, Iterator[T.Tensor]]:
     """Create data pipeline for Wiki-2 corpus in use by transformers."""
     # pylint: disable=consider-ternary-expression
 

@@ -26,7 +26,7 @@ import dotenv
 class Configuration:
     comet_enabled: Optional[bool] = None
     comet_api_key: Optional[str] = None
-    comet_project: Optional[str] = None
+    comet_project_name: Optional[str] = None
     comet_workspace: Optional[str] = None
 
     def load_from_env(self) -> None:
@@ -34,7 +34,7 @@ class Configuration:
 
         self.comet_enabled = Configuration._getenv_bool("COMET_ENABLED")
         self.comet_api_key = Configuration._getenv_nonempty("COMET_API_KEY")
-        self.comet_project = Configuration._getenv_nonempty("COMET_PROJECT")
+        self.comet_project_name = Configuration._getenv_nonempty("COMET_PROJECT_NAME")
         self.comet_workspace = Configuration._getenv_nonempty("COMET_WORKSPACE")
 
         self._require_enabled()

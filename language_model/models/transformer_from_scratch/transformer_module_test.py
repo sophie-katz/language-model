@@ -37,7 +37,7 @@ def test_transformer_module_training_step() -> None:
     """Simple."""
     transformer_module = TransformerModule(13)
 
-    loss = transformer_module.training_step([[1, 4, 8]], 0)
+    loss = transformer_module.training_step(T.tensor([[1, 4, 8]]), 0)
 
     assert isinstance(loss, T.Tensor)
     assert loss.ndim == 0
