@@ -46,7 +46,7 @@ if __name__ == "__main__":
     if configuration.comet_enabled:
         comet_experiment = comet_ml.Experiment(
             api_key=configuration.comet_api_key,
-            project_name=configuration.comet_project,
+            project_name=configuration.comet_project_name,
             workspace=configuration.comet_workspace,
         )
 

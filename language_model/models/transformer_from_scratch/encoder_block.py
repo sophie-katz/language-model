@@ -75,4 +75,5 @@ class EncoderBlock(nn.Module):
         T.Tensor
             A single tensor. TODO: Find the size of this.
         """
-        return self.transformer_block(QKV(source, source, source))
+        result: T.Tensor = self.transformer_block(QKV(source, source, source))
+        return result

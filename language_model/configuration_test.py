@@ -27,7 +27,7 @@ def test_configuration_simple() -> None:
         configuration.comet_api_key is not None and len(configuration.comet_api_key) > 0
     )
     assert (
-        configuration.comet_project is not None and len(configuration.comet_project) > 0
+        configuration.comet_project_name is not None and len(configuration.comet_project_name) > 0
     )
     assert (
         configuration.comet_workspace is not None

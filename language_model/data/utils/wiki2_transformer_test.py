@@ -31,7 +31,11 @@ def test_simple() -> None:
     """Test the simplest case."""
     _, datapipe = get_wiki2_transformer_datapipe(["a b .", "c d . ef ."])
 
-    assert list(datapipe) == [[2, 3], [4, 5], [6]]
+    data = list(datapipe)
+    assert len(data) == 3
+    assert T.equal(data[0], T.tensor([2, 3]))
+    assert T.equal(data[1], T.tensor([4, 5]))
+    assert T.equal(data[2], T.tensor([6]))
 
 
 def test_with_vocabulary() -> None:
@@ -46,7 +50,11 @@ def test_with_vocabulary() -> None:
         ["a b .", "c d . ef ."], vocabulary=vocabulary
     )
 
-    assert list(datapipe) == [[2, 3], [4, 0], [5]]
+    data = list(datapipe)
+    assert len(data) == 3
+    assert T.equal(data[0], T.tensor([2, 3]))
+    assert T.equal(data[1], T.tensor([4, 0]))
+    assert T.equal(data[2], T.tensor([5]))
 
 
 def test_integration_without_dataloader() -> None:

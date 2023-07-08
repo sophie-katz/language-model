@@ -22,15 +22,12 @@ https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch 
 used to help with its implementation.
 """
 
-from typing import Any, Generic, TypeVar, Union
+from typing import Any, Union
 
 import torch as T
 from torch import nn
 
 from language_model.models.transformer_from_scratch.qkv import QKV
-
-InternalLayer = TypeVar("InternalLayer", bound=nn.Module)
-
 
 class Residual(nn.Module):
     """A residual module from a transformer.
@@ -53,7 +50,7 @@ class Residual(nn.Module):
 
     def __init__(
         self,
-        internal_layer: InternalLayer,
+        internal_layer: nn.Module,
         input_feature_count: int,
         dropout_rate: float,
     ) -> None:

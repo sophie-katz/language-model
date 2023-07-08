@@ -26,7 +26,7 @@ class Checker(L.Callback):
     def __init__(self) -> None:
         super().__init__()
 
-        self._params_grad_started_at_zero = set()
+        self._params_grad_started_at_zero: set[str] = set()
 
     def on_after_backward(
         self,

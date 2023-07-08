@@ -107,4 +107,5 @@ class DecoderBlock(nn.Module):
             A single tensor. TODO: Find the size of this.
         """
         result: T.Tensor = self.self_attention(QKV(target, target, target), mask=mask)
-        return self.transformer_block(QKV(result, memory, memory))
+        result = self.transformer_block(QKV(result, memory, memory))
+        return result
