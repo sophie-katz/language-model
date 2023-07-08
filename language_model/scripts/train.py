@@ -71,8 +71,8 @@ if __name__ == "__main__":
 
     profiler = L.pytorch.profilers.AdvancedProfiler(dirpath=".", filename="perf_logs")
 
-    MAX_EPOCHS = 200
-    OVERFIT_BATCHES = 1000
+    MAX_EPOCHS = 10
+    OVERFIT_BATCHES = 1
 
     if comet_experiment is not None:
         comet_experiment.log_parameter("max_epochs", MAX_EPOCHS)

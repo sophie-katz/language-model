@@ -40,10 +40,10 @@ class TransformerModule(L.LightningModule):
         positional_encoding_max_sequence_length: int = 4096,
         positional_encoding_base: float = 1e4,
         encoder_block_head_count: int = 3,
-        encoder_block_feed_forward_hidden_feature_count: int = 1024,
+        encoder_block_feed_forward_hidden_feature_count: int = 128,
         encoder_block_residual_dropout_rate: float = 0.1,
         decoder_block_head_count: int = 3,
-        decoder_block_feed_forward_hidden_feature_count: int = 1024,
+        decoder_block_feed_forward_hidden_feature_count: int = 128,
         decoder_block_residual_dropout_rate: float = 0.1,
         learning_rate: float = 1e-4,
         comet_experiment: Optional[comet_ml.Experiment] = None,
@@ -161,6 +161,16 @@ class TransformerModule(L.LightningModule):
                 name="train/prediction",
                 step=self.global_step,
             )
+
+        target_for_loss = target.view(-1)
+        prediction_for_loss = prediction.view(-1, prediction.size(2))
+
+        print()
+        print(f"Target: {target_for_loss} (shape: {target_for_loss.shape})")
+        print(f"Prediction: {prediction_for_loss} (shape: {prediction_for_loss.shape})")
+        print(
+            f"  min: {prediction_for_loss.min()}, max: {prediction_for_loss.max()}, argmax: {prediction_for_loss.argmax(dim=-1)}"
+        )
 
         loss = F.cross_entropy(prediction.view(-1, prediction.size(2)), target.view(-1))
 
