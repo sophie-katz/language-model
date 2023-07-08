@@ -22,6 +22,7 @@ import lightning as L
 import torch.optim
 import torch as T
 import torch.nn.functional as F
+import torchmetrics
 
 from language_model.models.transformer_from_scratch.transformer import Transformer
 
@@ -88,6 +89,8 @@ class TransformerModule(L.LightningModule):
             self.comet_experiment.log_parameters(self.hparams)
 
         self.transformer = self._create_transformer()
+
+        self.accuracy = torchmetrics.Accuracy(task="multiclass", num_classes=word_embedding_vocabulary_size)
 
     def training_step(self, batch: Any, _: int) -> T.Tensor:
         """Perform a training step."""
@@ -165,19 +168,22 @@ class TransformerModule(L.LightningModule):
         target_for_loss = target.view(-1)
         prediction_for_loss = prediction.view(-1, prediction.size(2))
 
-        print()
-        print(f"Target: {target_for_loss} (shape: {target_for_loss.shape})")
-        print(f"Prediction: {prediction_for_loss} (shape: {prediction_for_loss.shape})")
-        print(
-            f"  min: {prediction_for_loss.min()}, max: {prediction_for_loss.max()}, argmax: {prediction_for_loss.argmax(dim=-1)}"
-        )
+        # print()
+        # print(f"Target: {target_for_loss} (shape: {target_for_loss.shape})")
+        # print(f"Prediction: {prediction_for_loss} (shape: {prediction_for_loss.shape})")
+        # print(
+        #     f"  min: {prediction_for_loss.min()}, max: {prediction_for_loss.max()}, argmax: {prediction_for_loss.argmax(dim=-1)}"
+        # )
 
-        loss = F.cross_entropy(prediction.view(-1, prediction.size(2)), target.view(-1))
+        loss = F.cross_entropy(prediction_for_loss, target_for_loss)
+
+        accuracy = self.accuracy(prediction_for_loss.argmax(dim=-1), target_for_loss) # type: ignore
 
         assert loss.ndim == 0, "expected loss to be a scalar"
 
-        if self.comet_experiment is not None:
+        if self.comet_experiment is not None and (self.global_step % 50) == 0:
             self.comet_experiment.log_metric("train/loss", loss, step=self.global_step)
+            self.comet_experiment.log_metric("train/accuracy", accuracy, step=self.global_step)
 
         return loss
 

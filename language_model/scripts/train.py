@@ -71,17 +71,17 @@ if __name__ == "__main__":
 
     profiler = L.pytorch.profilers.AdvancedProfiler(dirpath=".", filename="perf_logs")
 
-    MAX_EPOCHS = 10
-    OVERFIT_BATCHES = 1
+    MAX_EPOCHS = 100
+    # OVERFIT_BATCHES = 100
 
     if comet_experiment is not None:
         comet_experiment.log_parameter("max_epochs", MAX_EPOCHS)
-        comet_experiment.log_parameter("overfit_batches", OVERFIT_BATCHES)
+        # comet_experiment.log_parameter("overfit_batches", OVERFIT_BATCHES)
 
     trainer = L.Trainer(
         max_epochs=MAX_EPOCHS,
         # detect_anomaly=True,
-        overfit_batches=OVERFIT_BATCHES,
+        # overfit_batches=OVERFIT_BATCHES,
         logger=False,
         callbacks=[Checker()],
         # profiler=profiler,
