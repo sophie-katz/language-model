@@ -25,8 +25,8 @@ def test_decoder() -> None:
     batch_size = 2
     input_sequence_length = 5
     layer_count = 3
-    word_embedding_vocabulary_size = 13
-    word_embedding_feature_count = 512
+    token_embedding_vocabulary_size = 13
+    token_embedding_feature_count = 512
     positional_encoding_max_sequence_length = 4096
     positional_encoding_base = 1e4
     decoder_block_head_count = 6
@@ -36,8 +36,8 @@ def test_decoder() -> None:
     # fmt: off
     decoder = Decoder(
         layer_count=layer_count,
-        word_embedding_vocabulary_size=word_embedding_vocabulary_size,
-        word_embedding_feature_count=word_embedding_feature_count,
+        token_embedding_vocabulary_size=token_embedding_vocabulary_size,
+        token_embedding_feature_count=token_embedding_feature_count,
         positional_encoding_max_sequence_length=positional_encoding_max_sequence_length,
         positional_encoding_base=positional_encoding_base,
         decoder_block_head_count=decoder_block_head_count,
@@ -51,15 +51,15 @@ def test_decoder() -> None:
     # fmt: on
 
     target = T.randint(
-        word_embedding_vocabulary_size, (batch_size, input_sequence_length)
+        token_embedding_vocabulary_size, (batch_size, input_sequence_length)
     )
 
-    memory = T.rand(batch_size, input_sequence_length, word_embedding_feature_count)
+    memory = T.rand(batch_size, input_sequence_length, token_embedding_feature_count)
 
     result = decoder(target, memory)
 
     assert result.shape == (
         batch_size,
         input_sequence_length,
-        word_embedding_vocabulary_size,
+        token_embedding_vocabulary_size,
     )

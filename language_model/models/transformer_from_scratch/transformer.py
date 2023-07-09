@@ -58,9 +58,9 @@ class Transformer(nn.Module):
     positional_encoding_base : float
         The exponentiation base to use for generating the positional encoding matrix.
     vocabulary_size : int
-        The number of different words we expect to find in our input.
+        The number of different tokens we expect to find in our input.
     embedding_size : int
-        The size of the embedding vector for a given word.
+        The size of the embedding vector for a given token.
     max_sequence_length : int
         The maximum length of a sequence.
     encoder : Encoder
@@ -73,8 +73,8 @@ class Transformer(nn.Module):
         self,
         encoder_layer_count: int,
         decoder_layer_count: int,
-        word_embedding_vocabulary_size: int,
-        word_embedding_feature_count: int,
+        token_embedding_vocabulary_size: int,
+        token_embedding_feature_count: int,
         positional_encoding_max_sequence_length: int,
         positional_encoding_base: float,
         encoder_block_head_count: int,
@@ -88,8 +88,8 @@ class Transformer(nn.Module):
 
         self.encoder_layer_count = encoder_layer_count
         self.decoder_layer_count = decoder_layer_count
-        self.word_embedding_vocabulary_size = word_embedding_vocabulary_size
-        self.word_embedding_feature_count = word_embedding_feature_count
+        self.token_embedding_vocabulary_size = token_embedding_vocabulary_size
+        self.token_embedding_feature_count = token_embedding_feature_count
         self.positional_encoding_max_sequence_length = (
             positional_encoding_max_sequence_length
         )
@@ -108,8 +108,8 @@ class Transformer(nn.Module):
         # fmt: off
         self.encoder = Encoder(
             layer_count=self.encoder_layer_count,
-            word_embedding_vocabulary_size=self.word_embedding_vocabulary_size,
-            word_embedding_feature_count=self.word_embedding_feature_count,
+            token_embedding_vocabulary_size=self.token_embedding_vocabulary_size,
+            token_embedding_feature_count=self.token_embedding_feature_count,
             positional_encoding_max_sequence_length=(
                 self.positional_encoding_max_sequence_length
             ),
@@ -126,8 +126,8 @@ class Transformer(nn.Module):
 
         self.decoder = Decoder(
             layer_count=self.decoder_layer_count,
-            word_embedding_vocabulary_size=self.word_embedding_vocabulary_size,
-            word_embedding_feature_count=self.word_embedding_feature_count,
+            token_embedding_vocabulary_size=self.token_embedding_vocabulary_size,
+            token_embedding_feature_count=self.token_embedding_feature_count,
             positional_encoding_max_sequence_length=(
                 self.positional_encoding_max_sequence_length
             ),
@@ -158,10 +158,10 @@ class Transformer(nn.Module):
         """
         memory: T.Tensor = self.encoder(source)
         # `target` is of shape (batch_size, sequence_length), dtype long, and is a batch
-        # of word index vectors.
+        # of token index vectors.
         #
         # `memory` is of shape (batch_size, sequence_length,
-        # word_embedding_feature_count), dtype float32, and is a batch of word embedding
+        # token_embedding_feature_count), dtype float32, and is a batch of token embedding
         # matrices.
         result: T.Tensor = self.decoder(target, memory)
         return result
@@ -174,12 +174,12 @@ class Transformer(nn.Module):
             encoded = self.encoder(prompt.unsqueeze(dim=0))
             output = T.zeros(max_length, dtype=T.long)
 
-            for word_index in range(1, max_length):
-                decoded = self.decoder(output[:word_index].unsqueeze(dim=0), encoded)
-                output_word = decoded[:, :, -1].squeeze(dim=(0, 1)).argmax(dim=-1)
-                assert output_word.ndim == 0
-                yield output_word.item()
-                output[word_index] = output_word
+            for token_index in range(1, max_length):
+                decoded = self.decoder(output[:token_index].unsqueeze(dim=0), encoded)
+                output_token = decoded[:, :, -1].squeeze(dim=(0, 1)).argmax(dim=-1)
+                assert output_token.ndim == 0
+                yield output_token.item()
+                output[token_index] = output_token
 
         if training_original:
             self.train()

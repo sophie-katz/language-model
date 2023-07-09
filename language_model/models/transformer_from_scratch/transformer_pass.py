@@ -32,7 +32,9 @@ from torch import nn
 from language_model.models.transformer_from_scratch.positional_encoding import (
     get_positional_encoding,
 )
-from language_model.models.transformer_from_scratch.word_embedding import WordEmbedding
+from language_model.models.transformer_from_scratch.token_embedding import (
+    TokenEmbedding,
+)
 
 
 class TransformerPass(abc.ABC, nn.Module):
@@ -61,13 +63,13 @@ class TransformerPass(abc.ABC, nn.Module):
     positional_encoding_base : float
         The exponentiation base to use for generating the positional encoding matrix.
     vocabulary_size : int
-        The number of different words we expect to find in our input.
-    word_embedding_feature_count : int
-        The size of the embedding vector for a given word.
+        The number of different tokens we expect to find in our input.
+    token_embedding_feature_count : int
+        The size of the embedding vector for a given token.
     max_sequence_length : int
         The maximum length of a sequence.
-    word_embedding : WordEmbedding
-        The word embedding layer.
+    token_embedding : TokenEmbedding
+        The token embedding layer.
     layers : nn.ModuleList
         The decoder block layers.
     """
@@ -75,33 +77,33 @@ class TransformerPass(abc.ABC, nn.Module):
     def __init__(
         self,
         layer_count: int,
-        word_embedding_vocabulary_size: int,
-        word_embedding_feature_count: int,
+        token_embedding_vocabulary_size: int,
+        token_embedding_feature_count: int,
         positional_encoding_max_sequence_length: int,
         positional_encoding_base: float,
     ) -> None:
         super().__init__()
 
         self.layer_count = layer_count
-        self.word_embedding_vocabulary_size = word_embedding_vocabulary_size
-        self.word_embedding_feature_count = word_embedding_feature_count
+        self.token_embedding_vocabulary_size = token_embedding_vocabulary_size
+        self.token_embedding_feature_count = token_embedding_feature_count
         self.positional_encoding_max_sequence_length = (
             positional_encoding_max_sequence_length
         )
         self.positional_encoding_base = positional_encoding_base
 
-        self.word_embedding = WordEmbedding(
-            word_embedding_vocabulary_size, word_embedding_feature_count
+        self.token_embedding = TokenEmbedding(
+            token_embedding_vocabulary_size, token_embedding_feature_count
         )
 
         self.positional_encoding = get_positional_encoding(
             positional_encoding_max_sequence_length,
-            word_embedding_feature_count,
+            token_embedding_feature_count,
             positional_encoding_base,
         )
 
     def forward(self, tensor: T.Tensor) -> T.Tensor:
-        tensor = self.word_embedding(tensor)
+        tensor = self.token_embedding(tensor)
 
         # TODO: Possibly scale up embedding -
         # https://www.notion.so/Confirm-if-embedding-should-be-scaled-up-55f74b736e724bf0b40788873a9235ed?pvs=4

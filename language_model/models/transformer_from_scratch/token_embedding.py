@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License along with Language
 # Model. If not, see <https://www.gnu.org/licenses/>.
 
-"""Simple word embedding implementation for a transformer.
+"""Simple token embedding implementation for a transformer.
 
 This code is based off notebooks/word_embedding_from_scratch.ipynb.
 
@@ -25,21 +25,21 @@ import torch as T
 from torch import nn
 
 
-class WordEmbedding(nn.Module):
-    """A simple word embedding model.
+class TokenEmbedding(nn.Module):
+    """A simple token embedding model.
 
-    Takes a word as input and returns its embedding
+    Takes a token as input and returns its embedding
 
-    This module expects as input a tensor of word indices within the vocabulary of shape
-    `(sentence_length,)`. It returns a tensor of word embeddings of shape
+    This module expects as input a tensor of token indices within the vocabulary of shape
+    `(sentence_length,)`. It returns a tensor of token embeddings of shape
     `(sentence_length, feature_count)`.
 
     Attributes
     ----------
     vocabulary_size : int
-        The number of different words we expect to find in our input.
+        The number of different tokens we expect to find in our input.
     feature_count : int
-        The size of the embedding vector for a given word.
+        The size of the embedding vector for a given token.
     embedding : nn.Embedding
         The embedding layer.
     """
@@ -59,7 +59,7 @@ class WordEmbedding(nn.Module):
         Parameters
         ----------
         sentence : T.Tensor
-            Tensor of shape (sentence_length,) and to be a tensor of word indices within
+            Tensor of shape (sentence_length,) and to be a tensor of token indices within
             the vocabulary.
 
         Returns
@@ -72,7 +72,7 @@ class WordEmbedding(nn.Module):
 
         assert (
             sentence.ndim == 2
-        ), f"input sentence should be a batch of vectors of word indices, \
+        ), f"input sentence should be a batch of vectors of token indices, \
             not {sentence.shape}"
 
         result: T.Tensor = self.embedding(sentence)

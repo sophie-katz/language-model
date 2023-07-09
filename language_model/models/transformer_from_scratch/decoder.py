@@ -54,8 +54,8 @@ class Decoder(nn.Module):
     def __init__(
         self,
         layer_count: int,
-        word_embedding_vocabulary_size: int,
-        word_embedding_feature_count: int,
+        token_embedding_vocabulary_size: int,
+        token_embedding_feature_count: int,
         positional_encoding_max_sequence_length: int,
         positional_encoding_base: float,
         decoder_block_head_count: int,
@@ -68,13 +68,13 @@ class Decoder(nn.Module):
         # fmt: on
 
         self.layer_count = layer_count
-        self.word_embedding_vocabulary_size = word_embedding_vocabulary_size
-        self.word_embedding_feature_count = word_embedding_feature_count
+        self.token_embedding_vocabulary_size = token_embedding_vocabulary_size
+        self.token_embedding_feature_count = token_embedding_feature_count
         self.positional_encoding_max_sequence_length = (
             positional_encoding_max_sequence_length
         )
         self.positional_encoding_base = positional_encoding_base
-        self.word_embedding_vocabulary_size = word_embedding_vocabulary_size
+        self.token_embedding_vocabulary_size = token_embedding_vocabulary_size
         self.decoder_block_head_count = decoder_block_head_count
         self.decoder_block_feed_forward_hidden_feature_count = (
             decoder_block_feed_forward_hidden_feature_count
@@ -83,8 +83,8 @@ class Decoder(nn.Module):
 
         self.transformer_pass = TransformerPass(
             layer_count=layer_count,
-            word_embedding_vocabulary_size=word_embedding_vocabulary_size,
-            word_embedding_feature_count=word_embedding_feature_count,
+            token_embedding_vocabulary_size=token_embedding_vocabulary_size,
+            token_embedding_feature_count=token_embedding_feature_count,
             positional_encoding_max_sequence_length=positional_encoding_max_sequence_length,
             positional_encoding_base=positional_encoding_base,
         )
@@ -93,7 +93,7 @@ class Decoder(nn.Module):
         self.layers = nn.ModuleList(
             [
                 DecoderBlock(
-                    input_feature_count=word_embedding_feature_count,
+                    input_feature_count=token_embedding_feature_count,
                     head_count=decoder_block_head_count,
                     feed_forward_hidden_feature_count=(
                         decoder_block_feed_forward_hidden_feature_count
@@ -106,7 +106,7 @@ class Decoder(nn.Module):
         # fmt: on
 
         self.linear = nn.Linear(
-            word_embedding_feature_count, word_embedding_vocabulary_size
+            token_embedding_feature_count, token_embedding_vocabulary_size
         )
 
     def forward(self, target: T.Tensor, memory: T.Tensor) -> T.Tensor:
@@ -124,7 +124,7 @@ class Decoder(nn.Module):
         T.Tensor
             A single tensor. TODO: Find the size of this.
         """
-        # target = self.word_embedding(target)
+        # target = self.token_embedding(target)
 
         # # TODO: Possibly scale up embedding -
         # # https://www.notion.so/Confirm-if-embedding-should-be-scaled-up-55f74b736e724bf0b40788873a9235ed?pvs=4
@@ -146,7 +146,7 @@ class Decoder(nn.Module):
         assert result.shape == (
             get_sequence_batch_size(target),
             get_sequence_length(target),
-            self.word_embedding_vocabulary_size,
+            self.token_embedding_vocabulary_size,
         )
 
         result = T.softmax(result, dim=-1)
@@ -154,7 +154,7 @@ class Decoder(nn.Module):
         assert result.shape == (
             get_sequence_batch_size(target),
             get_sequence_length(target),
-            self.word_embedding_vocabulary_size,
+            self.token_embedding_vocabulary_size,
         )
 
         return result

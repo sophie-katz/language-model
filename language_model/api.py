@@ -59,15 +59,15 @@ class LanguageModelAPI(object):
 
         prompt_tokens = self._state.tokenizer(prompt_text)
 
-        prompt_word_indices = T.tensor(
+        prompt_token_indices = T.tensor(
             [self._state.vocabulary.get_stoi()[token] for token in prompt_tokens],
             dtype=T.long,
         )
 
-        for inferred_word_index in self._state.transformer.infer(
-            prompt_word_indices, self.inferred_max_length
+        for inferred_token_index in self._state.transformer.infer(
+            prompt_token_indices, self.inferred_max_length
         ):
-            yield self._state.vocabulary.get_itos()[inferred_word_index]
+            yield self._state.vocabulary.get_itos()[inferred_token_index]
 
     def _load_vocabulary(self) -> torchtext.vocab.Vocab:
         train = torchtext.datasets.WikiText2(root=".data", split="train")
@@ -78,7 +78,7 @@ class LanguageModelAPI(object):
         # pylint: disable=too-many-locals
         encoder_layer_count = 3
         decoder_layer_count = 3
-        word_embedding_feature_count = 512
+        token_embedding_feature_count = 512
         positional_encoding_max_sequence_length = 4096
         positional_encoding_base = 1e4
         encoder_block_head_count = 6
@@ -91,8 +91,8 @@ class LanguageModelAPI(object):
         return Transformer(
             encoder_layer_count=encoder_layer_count,
             decoder_layer_count=decoder_layer_count,
-            word_embedding_vocabulary_size=vocabulary_size,
-            word_embedding_feature_count=word_embedding_feature_count,
+            token_embedding_vocabulary_size=vocabulary_size,
+            token_embedding_feature_count=token_embedding_feature_count,
             positional_encoding_max_sequence_length=positional_encoding_max_sequence_length,
             positional_encoding_base=positional_encoding_base,
             encoder_block_head_count=encoder_block_head_count,

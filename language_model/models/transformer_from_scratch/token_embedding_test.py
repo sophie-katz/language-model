@@ -18,19 +18,21 @@
 import pytest
 import torch as T
 
-from language_model.models.transformer_from_scratch.word_embedding import WordEmbedding
+from language_model.models.transformer_from_scratch.token_embedding import (
+    TokenEmbedding,
+)
 
 
-def test_word_embedding_simple() -> None:
-    """Test the shape of word embeddings."""
+def test_token_embedding_simple() -> None:
+    """Test the shape of token embeddings."""
     batch_size = 2
     vocabulary_size = 3
     sentence_length = 4
     feature_count = 8
 
-    word_embedding_layer = WordEmbedding(vocabulary_size, feature_count)
+    token_embedding_layer = TokenEmbedding(vocabulary_size, feature_count)
 
-    word_indices = T.randint(
+    token_indices = T.randint(
         vocabulary_size,
         (
             batch_size,
@@ -38,22 +40,22 @@ def test_word_embedding_simple() -> None:
         ),
     )
 
-    word_embeddings = word_embedding_layer(word_indices)
+    token_embeddings = token_embedding_layer(token_indices)
 
-    assert word_embeddings.shape == (batch_size, sentence_length, feature_count)
+    assert token_embeddings.shape == (batch_size, sentence_length, feature_count)
 
 
 @pytest.mark.skipif(not T.cuda.is_available(), reason="CUDA not available")
-def test_word_embedding_cuda() -> None:
-    """Test the shape of word embeddings."""
+def test_token_embedding_cuda() -> None:
+    """Test the shape of token embeddings."""
     batch_size = 2
     vocabulary_size = 3
     sentence_length = 4
     feature_count = 8
 
-    word_embedding_layer = WordEmbedding(vocabulary_size, feature_count).cuda()
+    token_embedding_layer = TokenEmbedding(vocabulary_size, feature_count).cuda()
 
-    word_indices = T.randint(
+    token_indices = T.randint(
         vocabulary_size,
         (
             batch_size,
@@ -61,6 +63,6 @@ def test_word_embedding_cuda() -> None:
         ),
     ).cuda()
 
-    word_embeddings = word_embedding_layer(word_indices)
+    token_embeddings = token_embedding_layer(token_indices)
 
-    assert word_embeddings.device.type == "cuda"
+    assert token_embeddings.device.type == "cuda"

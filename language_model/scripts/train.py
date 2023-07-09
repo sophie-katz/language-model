@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
     # Create Lightning components
     transformer_module = TransformerModule(
-        word_embedding_vocabulary_size=len(vocabulary),
+        token_embedding_vocabulary_size=len(vocabulary),
         comet_experiment=comet_experiment,
     )
 

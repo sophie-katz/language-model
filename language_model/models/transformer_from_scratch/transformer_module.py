@@ -34,10 +34,10 @@ class TransformerModule(L.LightningModule):
 
     def __init__(
         self,
-        word_embedding_vocabulary_size: int,
+        token_embedding_vocabulary_size: int,
         encoder_layer_count: int = 1,
         decoder_layer_count: int = 1,
-        word_embedding_feature_count: int = 512,
+        token_embedding_feature_count: int = 512,
         positional_encoding_max_sequence_length: int = 4096,
         positional_encoding_base: float = 1e4,
         encoder_block_head_count: int = 3,
@@ -55,13 +55,13 @@ class TransformerModule(L.LightningModule):
         """
         super().__init__()
 
-        self.hparams.word_embedding_vocabulary_size = (  # type: ignore
-            word_embedding_vocabulary_size
+        self.hparams.token_embedding_vocabulary_size = (  # type: ignore
+            token_embedding_vocabulary_size
         )
         self.hparams.encoder_layer_count = encoder_layer_count  # type: ignore
         self.hparams.decoder_layer_count = decoder_layer_count  # type: ignore
-        self.hparams.word_embedding_feature_count = (  # type: ignore
-            word_embedding_feature_count
+        self.hparams.token_embedding_feature_count = (  # type: ignore
+            token_embedding_feature_count
         )
         self.hparams.positional_encoding_max_sequence_length = (  # type: ignore
             positional_encoding_max_sequence_length
@@ -90,7 +90,9 @@ class TransformerModule(L.LightningModule):
 
         self.transformer = self._create_transformer()
 
-        self.accuracy = torchmetrics.Accuracy(task="multiclass", num_classes=word_embedding_vocabulary_size)
+        self.accuracy = torchmetrics.Accuracy(
+            task="multiclass", num_classes=token_embedding_vocabulary_size
+        )
 
     def training_step(self, batch: Any, _: int) -> T.Tensor:
         """Perform a training step."""
@@ -98,31 +100,31 @@ class TransformerModule(L.LightningModule):
 
         assert (
             batch.ndim == 2
-        ), f"input sentence should be a batch of vectors of word indices, \
+        ), f"input sentence should be a batch of vectors of token indices, \
             not {batch.shape}"
 
         source = target = batch
 
         # if self.comet_experiment is not None and (self.global_step % 50) == 0:
         #     self.comet_experiment.log_histogram_3d(
-        #         self.transformer.encoder.transformer_pass.word_embedding.embedding.weight.detach()
+        #         self.transformer.encoder.transformer_pass.token_embedding.embedding.weight.detach()
         #         .cpu()
         #         .numpy(),
-        #         name="encoder/word_embedding/weight",
+        #         name="encoder/token_embedding/weight",
         #         step=self.global_step,
         #     )
 
         # if (
         #     self.comet_experiment is not None
         #     and (self.global_step % 50) == 0
-        #     and self.transformer.encoder.transformer_pass.word_embedding.embedding.weight.grad
+        #     and self.transformer.encoder.transformer_pass.token_embedding.embedding.weight.grad
         #     is not None
         # ):
         #     self.comet_experiment.log_histogram_3d(
-        #         self.transformer.encoder.transformer_pass.word_embedding.embedding.weight.grad.detach()
+        #         self.transformer.encoder.transformer_pass.token_embedding.embedding.weight.grad.detach()
         #         .cpu()
         #         .numpy(),
-        #         name="encoder/word_embedding/weight/grad",
+        #         name="encoder/token_embedding/weight/grad",
         #         step=self.global_step,
         #     )
 
@@ -155,7 +157,7 @@ class TransformerModule(L.LightningModule):
         ), "expected prediction to have same sequence length as target"
         assert (
             prediction.size(2)
-            == self.hparams.word_embedding_vocabulary_size  # type: ignore
+            == self.hparams.token_embedding_vocabulary_size  # type: ignore
         ), "expected prediction to be of vocabulary size"
 
         if self.comet_experiment is not None and (self.global_step % 50) == 0:
@@ -177,13 +179,15 @@ class TransformerModule(L.LightningModule):
 
         loss = F.cross_entropy(prediction_for_loss, target_for_loss)
 
-        accuracy = self.accuracy(prediction_for_loss.argmax(dim=-1), target_for_loss) # type: ignore
+        accuracy = self.accuracy(prediction_for_loss.argmax(dim=-1), target_for_loss)  # type: ignore
 
         assert loss.ndim == 0, "expected loss to be a scalar"
 
         if self.comet_experiment is not None and (self.global_step % 50) == 0:
             self.comet_experiment.log_metric("train/loss", loss, step=self.global_step)
-            self.comet_experiment.log_metric("train/accuracy", accuracy, step=self.global_step)
+            self.comet_experiment.log_metric(
+                "train/accuracy", accuracy, step=self.global_step
+            )
 
         return loss
 
@@ -208,11 +212,11 @@ class TransformerModule(L.LightningModule):
         return Transformer(
             encoder_layer_count=self.hparams.encoder_layer_count,  # type: ignore
             decoder_layer_count=self.hparams.decoder_layer_count,  # type: ignore
-            word_embedding_vocabulary_size=(
-                self.hparams.word_embedding_vocabulary_size  # type: ignore
+            token_embedding_vocabulary_size=(
+                self.hparams.token_embedding_vocabulary_size  # type: ignore
             ),
-            word_embedding_feature_count=(
-                self.hparams.word_embedding_feature_count  # type: ignore
+            token_embedding_feature_count=(
+                self.hparams.token_embedding_feature_count  # type: ignore
             ),
             positional_encoding_max_sequence_length=(
                 self.hparams.positional_encoding_max_sequence_length  # type: ignore
