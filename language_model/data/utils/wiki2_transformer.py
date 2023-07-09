@@ -47,7 +47,7 @@ def get_wiki2_transformer_datapipe(
 
     if vocabulary is None:
         datapipe_indices = BuildVocabularyFromTokens(
-            datapipe_tokens_filtered, specials=["<unk>"]
+            datapipe_tokens_filtered, specials=["<unk>", "<eos>"]
         )
 
         vocabulary = datapipe_indices.vocabulary
@@ -55,7 +55,7 @@ def get_wiki2_transformer_datapipe(
         datapipe_indices = ApplyVocabularyToTokens(datapipe_tokens_filtered, vocabulary)
 
     datapipe_sentences_for_examples = SplitSentencesByIndex(
-        datapipe_indices, vocabulary["."]
+        datapipe_indices, vocabulary["."], vocabulary["<eos>"]
     )
 
     datapipe_sentences = dp.iter.FlatMapper(datapipe_sentences_for_examples)

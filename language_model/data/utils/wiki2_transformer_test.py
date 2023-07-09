@@ -33,15 +33,15 @@ def test_simple() -> None:
 
     data = list(datapipe)
     assert len(data) == 3
-    assert T.equal(data[0], T.tensor([2, 3]))
-    assert T.equal(data[1], T.tensor([4, 5]))
-    assert T.equal(data[2], T.tensor([6]))
+    assert T.equal(data[0], T.tensor([3, 4, 1]))
+    assert T.equal(data[1], T.tensor([5, 6, 1]))
+    assert T.equal(data[2], T.tensor([7, 1]))
 
 
 def test_with_vocabulary() -> None:
     """Test the simplest case."""
     vocabulary = torchtext.vocab.build_vocab_from_iterator(
-        [["a", "b", ".", "c", "ef"]], specials=["<unk>"]
+        [["a", "b", ".", "c", "ef"]], specials=["<unk>", "<eos>"]
     )
 
     vocabulary.set_default_index(vocabulary["<unk>"])
@@ -52,9 +52,9 @@ def test_with_vocabulary() -> None:
 
     data = list(datapipe)
     assert len(data) == 3
-    assert T.equal(data[0], T.tensor([2, 3]))
-    assert T.equal(data[1], T.tensor([4, 0]))
-    assert T.equal(data[2], T.tensor([5]))
+    assert T.equal(data[0], T.tensor([3, 4, 1]))
+    assert T.equal(data[1], T.tensor([5, 0, 1]))
+    assert T.equal(data[2], T.tensor([6, 1]))
 
 
 def test_integration_without_dataloader() -> None:
@@ -66,11 +66,12 @@ def test_integration_without_dataloader() -> None:
 
     for batch_index, batch in enumerate(itertools.islice(train_datapipe, 5)):
         assert isinstance(batch, T.Tensor)
+        assert batch[-1].item() == vocabulary.get_stoi()["<eos>"]
 
         if batch_index == 0:
-            assert batch.shape == (5,)
+            assert batch.shape == (6,)
         elif batch_index == 1:
-            assert batch.shape == (13,)
+            assert batch.shape == (14,)
 
 
 def test_integration_with_dataloader() -> None:
@@ -86,9 +87,9 @@ def test_integration_with_dataloader() -> None:
         assert isinstance(batch, T.Tensor)
 
         if batch_index == 0:
-            assert batch.shape == (1, 5)
+            assert batch.shape == (1, 6)
         elif batch_index == 1:
-            assert batch.shape == (1, 13)
+            assert batch.shape == (1, 14)
 
 
 def test_performance_with_dataloader() -> None:

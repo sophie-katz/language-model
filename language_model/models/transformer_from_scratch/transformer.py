@@ -75,6 +75,7 @@ class Transformer(nn.Module):
         decoder_layer_count: int,
         token_embedding_vocabulary_size: int,
         token_embedding_feature_count: int,
+        token_index_eos: int,
         positional_encoding_max_sequence_length: int,
         positional_encoding_base: float,
         encoder_block_head_count: int,
@@ -90,6 +91,7 @@ class Transformer(nn.Module):
         self.decoder_layer_count = decoder_layer_count
         self.token_embedding_vocabulary_size = token_embedding_vocabulary_size
         self.token_embedding_feature_count = token_embedding_feature_count
+        self.token_index_eos = token_index_eos
         self.positional_encoding_max_sequence_length = (
             positional_encoding_max_sequence_length
         )
@@ -176,8 +178,13 @@ class Transformer(nn.Module):
 
             for token_index in range(1, max_length):
                 decoded = self.decoder(output[:token_index].unsqueeze(dim=0), encoded)
+
                 output_token = decoded[:, :, -1].squeeze(dim=(0, 1)).argmax(dim=-1)
                 assert output_token.ndim == 0
+
+                if output_token.item() == self.token_index_eos:
+                    break
+
                 yield output_token.item()
                 output[token_index] = output_token
 

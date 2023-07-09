@@ -28,14 +28,14 @@ from language_model.models.transformer_from_scratch.transformer_module import (
 
 def test_transformer_module_optimizer_smoke() -> None:
     """Simple."""
-    transformer_module = TransformerModule(13)
+    transformer_module = TransformerModule(13, 12)
 
     transformer_module.configure_optimizers()
 
 
 def test_transformer_module_training_step() -> None:
     """Simple."""
-    transformer_module = TransformerModule(13)
+    transformer_module = TransformerModule(13, 12)
 
     loss = transformer_module.training_step(T.tensor([[1, 4, 8]]), 0)
 
@@ -53,7 +53,9 @@ def test_integration() -> None:
 
     train_dataloader = torch.utils.data.DataLoader(train_datapipe)  # type: ignore
 
-    transformer_module = TransformerModule(len(vocabulary))
+    transformer_module = TransformerModule(
+        len(vocabulary), vocabulary.get_stoi()["<eos>"]
+    )
 
     trainer = L.Trainer(max_steps=10)
 

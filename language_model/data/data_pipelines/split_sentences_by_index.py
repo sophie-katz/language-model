@@ -24,12 +24,15 @@ import torchdata.datapipes as dp
 class SplitSentencesByIndex(dp.iter.IterDataPipe):  # type: ignore[misc]
     """A data pipeline that builds a vocabulary from tokens."""
 
-    def __init__(self, datapipe: dp.iter.IterDataPipe, period_index: int) -> None:
+    def __init__(
+        self, datapipe: dp.iter.IterDataPipe, period_index: int, eos_index: int
+    ) -> None:
         """Initialize the data pipeline."""
         super().__init__()
 
         self.datapipe = datapipe
         self.period_index = period_index
+        self.eos_index = eos_index
 
     def __iter__(self) -> Iterator[list[list[int]]]:
         """Get the next example."""
@@ -40,12 +43,14 @@ class SplitSentencesByIndex(dp.iter.IterDataPipe):  # type: ignore[misc]
             for index in example:
                 if index == self.period_index:
                     if len(sentence) > 0:
+                        sentence.append(self.eos_index)
                         sentences.append(sentence)
                         sentence = []
                 else:
                     sentence.append(index)
 
             if len(sentence) > 0:
+                sentence.append(self.eos_index)
                 sentences.append(sentence)
 
             yield sentences

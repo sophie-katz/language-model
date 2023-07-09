@@ -35,6 +35,7 @@ class TransformerModule(L.LightningModule):
     def __init__(
         self,
         token_embedding_vocabulary_size: int,
+        token_index_eos: int,
         encoder_layer_count: int = 1,
         decoder_layer_count: int = 1,
         token_embedding_feature_count: int = 512,
@@ -58,6 +59,7 @@ class TransformerModule(L.LightningModule):
         self.hparams.token_embedding_vocabulary_size = (  # type: ignore
             token_embedding_vocabulary_size
         )
+        self.hparams.token_index_eos = token_index_eos  # type: ignore
         self.hparams.encoder_layer_count = encoder_layer_count  # type: ignore
         self.hparams.decoder_layer_count = decoder_layer_count  # type: ignore
         self.hparams.token_embedding_feature_count = (  # type: ignore
@@ -218,6 +220,7 @@ class TransformerModule(L.LightningModule):
             token_embedding_feature_count=(
                 self.hparams.token_embedding_feature_count  # type: ignore
             ),
+            token_index_eos=self.hparams.token_index_eos, # type: ignore
             positional_encoding_max_sequence_length=(
                 self.hparams.positional_encoding_max_sequence_length  # type: ignore
             ),

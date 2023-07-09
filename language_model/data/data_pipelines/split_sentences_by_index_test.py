@@ -27,14 +27,14 @@ from language_model.data.data_pipelines.split_sentences_by_index import (
 def test_simple() -> None:
     """Test the simplest case."""
     datapipe = dp.iter.IterableWrapper([[1], [2, 3, 0]])
-    datapipe = SplitSentencesByIndex(datapipe, 3)
+    datapipe = SplitSentencesByIndex(datapipe, 3, 8)
 
-    assert [list(example) for example in datapipe] == [[[1]], [[2], [0]]]
+    assert [list(example) for example in datapipe] == [[[1, 8]], [[2, 8], [0, 8]]]
 
 
 def test_at_end() -> None:
     """Test the simplest case."""
     datapipe = dp.iter.IterableWrapper([[1], [2, 3, 0]])
-    datapipe = SplitSentencesByIndex(datapipe, 0)
+    datapipe = SplitSentencesByIndex(datapipe, 0, 8)
 
-    assert [list(example) for example in datapipe] == [[[1]], [[2, 3]]]
+    assert [list(example) for example in datapipe] == [[[1, 8]], [[2, 3, 8]]]

@@ -33,6 +33,7 @@ def test_transformer_simple_forward() -> None:
     decoder_layer_count = 3
     token_embedding_vocabulary_size = 13
     token_embedding_feature_count = 512
+    token_index_eos = 12
     positional_encoding_max_sequence_length = 4096
     positional_encoding_base = 1e4
     encoder_block_head_count = 6
@@ -48,6 +49,7 @@ def test_transformer_simple_forward() -> None:
         decoder_layer_count=decoder_layer_count,
         token_embedding_vocabulary_size=token_embedding_vocabulary_size,
         token_embedding_feature_count=token_embedding_feature_count,
+        token_index_eos=token_index_eos,
         positional_encoding_max_sequence_length=positional_encoding_max_sequence_length,
         positional_encoding_base=positional_encoding_base,
         encoder_block_head_count=encoder_block_head_count,
@@ -87,6 +89,7 @@ def test_infer() -> None:
     decoder_layer_count = 3
     token_embedding_vocabulary_size = 13
     token_embedding_feature_count = 512
+    token_index_eos = 12
     positional_encoding_max_sequence_length = 4096
     positional_encoding_base = 1e4
     encoder_block_head_count = 6
@@ -102,6 +105,7 @@ def test_infer() -> None:
         decoder_layer_count=decoder_layer_count,
         token_embedding_vocabulary_size=token_embedding_vocabulary_size,
         token_embedding_feature_count=token_embedding_feature_count,
+        token_index_eos=token_index_eos,
         positional_encoding_max_sequence_length=positional_encoding_max_sequence_length,
         positional_encoding_base=positional_encoding_base,
         encoder_block_head_count=encoder_block_head_count,
