@@ -10,6 +10,13 @@
             "request": "launch",
             "module": "language_model.scripts.train",
             "justMyCode": true
+        },
+        {
+            "name": "Infer",
+            "type": "python",
+            "request": "launch",
+            "module": "language_model.scripts.infer",
+            "justMyCode": true
         }
     ]
 }

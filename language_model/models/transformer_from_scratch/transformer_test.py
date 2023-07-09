@@ -79,3 +79,58 @@ def test_transformer_simple_forward() -> None:
         input_sequence_length,
         word_embedding_vocabulary_size,
     )
+
+def test_infer() -> None:
+    input_sequence_length = 5
+    encoder_layer_count = 3
+    decoder_layer_count = 3
+    word_embedding_vocabulary_size = 13
+    word_embedding_feature_count = 512
+    positional_encoding_max_sequence_length = 4096
+    positional_encoding_base = 1e4
+    encoder_block_head_count = 6
+    encoder_block_feed_forward_hidden_feature_count = 8
+    encoder_block_residual_dropout_rate = 0.1
+    decoder_block_head_count = 6
+    decoder_block_feed_forward_hidden_feature_count = 8
+    decoder_block_residual_dropout_rate = 0.1
+
+    # fmt: off
+    transformer = Transformer(
+        encoder_layer_count=encoder_layer_count,
+        decoder_layer_count=decoder_layer_count,
+        word_embedding_vocabulary_size=word_embedding_vocabulary_size,
+        word_embedding_feature_count=word_embedding_feature_count,
+        positional_encoding_max_sequence_length=positional_encoding_max_sequence_length,
+        positional_encoding_base=positional_encoding_base,
+        encoder_block_head_count=encoder_block_head_count,
+        encoder_block_feed_forward_hidden_feature_count=(
+            encoder_block_feed_forward_hidden_feature_count
+        ),
+        encoder_block_residual_dropout_rate=encoder_block_residual_dropout_rate,
+        decoder_block_head_count=decoder_block_head_count,
+        decoder_block_feed_forward_hidden_feature_count=(
+            decoder_block_feed_forward_hidden_feature_count
+        ),
+        decoder_block_residual_dropout_rate=decoder_block_residual_dropout_rate,
+    )
+    # fmt: on
+
+    prompt = T.randint(
+        word_embedding_vocabulary_size, (input_sequence_length,)
+    )
+
+    count = 0
+
+    for word in transformer.infer(prompt, 50):
+        assert isinstance(word, T.Tensor)
+        assert word.ndim == 0
+        assert word.dtype == T.long
+        
+        word_index = word.item()
+        assert word_index >= 0
+        assert word_index < word_embedding_vocabulary_size
+
+        count += 1
+
+    assert count > 0 and count <= 50

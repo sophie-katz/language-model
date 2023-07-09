@@ -4,6 +4,7 @@
         "tamasfe.even-better-toml",
         "wayou.vscode-todo-highlight",
         "ms-python.pylint",
-        "ms-python.isort"
+        "ms-python.isort",
+        "ms-python.black-formatter"
     ]
 }

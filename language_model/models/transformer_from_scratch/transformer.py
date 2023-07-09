@@ -22,8 +22,11 @@ https://www.kaggle.com/code/arunmohan003/transformer-from-scratch-using-pytorch 
 used to help with its implementation.
 """
 
+from collections.abc import Iterable
+
 import torch as T
 from torch import nn
+import torch.nn.functional as F
 
 from language_model.models.transformer_from_scratch.decoder import Decoder
 from language_model.models.transformer_from_scratch.encoder import Encoder
@@ -154,11 +157,29 @@ class Transformer(nn.Module):
             A single tensor. TODO: Find the size of this.
         """
         memory: T.Tensor = self.encoder(source)
+        # `target` is of shape (batch_size, sequence_length), dtype long, and is a batch
+        # of word index vectors.
+        #
+        # `memory` is of shape (batch_size, sequence_length,
+        # word_embedding_feature_count), dtype float32, and is a batch of word embedding
+        # matrices.
         result: T.Tensor = self.decoder(target, memory)
         return result
 
-    # TODO: Needs to be implemented
-    # https://www.notion.so/Implement-inference-70a9380b01774103b37dce5dfc398479?pvs=4
-    def infer(self) -> None:
-        """Inferer."""
-        raise NotImplementedError()
+    def infer(self, prompt: T.Tensor, max_length: int) -> Iterable[T.Tensor]:
+        training_original = self.training
+        self.eval()
+
+        with T.no_grad():
+            encoded = self.encoder(prompt.unsqueeze(dim=0))
+            output = T.zeros(max_length, dtype=T.long)
+
+            for word_index in range(1, max_length):
+                decoded = self.decoder(output[:word_index].unsqueeze(dim=0), encoded)
+                output_word = decoded[:, :, -1].squeeze(dim=(0, 1)).argmax(dim=-1)
+                assert output_word.ndim == 0
+                yield output_word.item()
+                output[word_index] = output_word
+
+        if training_original:
+            self.train()

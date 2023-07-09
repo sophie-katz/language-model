@@ -196,6 +196,12 @@ class TransformerModule(L.LightningModule):
             eps=1e-9,
         )
 
+    # TODO: Needs to be implemented
+    # https://www.notion.so/Implement-inference-70a9380b01774103b37dce5dfc398479?pvs=4
+    def infer(self) -> None:
+        """Inferer."""
+        raise NotImplementedError()
+
     def _create_transformer(self) -> Transformer:
         """Create the transformer."""
         # fmt: off
